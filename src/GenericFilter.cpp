@@ -1,126 +1,106 @@
-#include "msfc/filter/GenericFilter.h"
-#include "msfc/logging.h"
+#include "GenericFilter.h"
 
-namespace msfc {
+#include <sstream>
 
-namespace filt {
+namespace fratio {
 
-    GenericFilter::GenericFilter(size_t nData)
-    // : m_filteredData(nData, order)
-    // , m_rawData(nData, order)
-    {
-    }
+GenericFilter::GenericFilter(size_t nData)
+{
+}
 
-    GenericFilter::GenericFilter(size_t nData, const std::vector<double>& aCoeff, const std::vector<double>& bCoeff)
-        : m_aCoeff(aCoeff)
-        , m_bCoeff(bCoeff)
-        , m_filteredData(aCoeff.size())
-        , m_rawData(bCoeff.size())
-    {
-        assert(aCoeff.size() > 0);
-        assert(bCoeff.size() > 0);
-        normalize();
-    }
+GenericFilter::GenericFilter(size_t nData, const std::vector<double>& aCoeff, const std::vector<double>& bCoeff)
+    : m_aCoeff(aCoeff)
+    , m_bCoeff(bCoeff)
+    , m_filteredData(aCoeff.size(), 0)
+    , m_rawData(bCoeff.size(), 0)
+{
+    checkCoeffs(aCoeff, bCoeff);
+    normalize();
+}
 
-    void GenericFilter::setNData(size_t nData)
-    {
-        // m_filteredData.resize(nData, m_filteredData.cols());
-        // m_rawData.resize(nData, nData.cols());
-    }
+void GenericFilter::setNData(size_t nData)
+{
+    // m_filteredData.resize(nData, m_filteredData.cols());
+    // m_rawData.resize(nData, nData.cols());
+}
 
-    void GenericFilter::setCoeff(const std::vector<double>& aCoeff, const std::vector<double>& bCoeff)
-    {
-        assert(aCoeff.size() > 0);
-        assert(bCoeff.size() > 0);
+void GenericFilter::setCoeff(const std::vector<double>& aCoeff, const std::vector<double>& bCoeff)
+{
+    checkCoeffs(aCoeff, bCoeff);
 
-        m_nACoeffFilteredData = 0;
-        m_nBCoeffFilteredData = 0;
-        m_aCoeff = aCoeff;
-        m_bCoeff = bCoeff;
-        m_filteredData.resize(aCoeff.size());
-        m_rawData.resize(bCoeff.size());
+    m_aCoeff = aCoeff;
+    m_bCoeff = bCoeff;
+    resetFilter();
 
-        normalize();
-    }
+    normalize();
+}
 
-    void GenericFilter::getCoeff(std::vector<double>& aCoeff, std::vector<double>& bCoeff) const noexcept
-    {
-        aCoeff = m_aCoeff;
-        bCoeff = m_bCoeff;
-    }
+void GenericFilter::getCoeff(std::vector<double>& aCoeff, std::vector<double>& bCoeff) const noexcept
+{
+    aCoeff = m_aCoeff;
+    bCoeff = m_bCoeff;
+}
 
-    // bool GenericFilter::stepFilter(const Eigen::VectorXd& data)
-    // {
-    //     if (m_filteredData.rows() != data.size()) {
-    //         LOG_ERROR("Bad data size. Expected vector of size " << m_filteredData.rows() << ", got a vector of size " << data.size());
-    //         return false;
-    //     }
+double GenericFilter::stepFilter(double data)
+{
+    // Slide data
+    for (auto rit1 = m_rawData.rbegin(), rit2 = m_rawData.rbegin() + 1; rit2 != m_rawData.rend(); ++rit1, ++rit2)
+        *rit1 = *rit2;
+    for (auto rit1 = m_filteredData.rbegin(), rit2 = m_filteredData.rbegin() + 1; rit2 != m_filteredData.rend(); ++rit1, ++rit2)
+        *rit1 = *rit2;
 
-    //     if (m_nFilteredData == 0) {
-    //         m_rawData.row(0) = data;
-    //         m_filteredData.row(0).noalias() = m_bCoeff(0) * data;
-    //         ++m_nFilteredData;
-    //     } else if (m_nFilteredData < m_order) {
-    //         m_filteredData.row(m_nFilteredData).noalias() = m_bCoeff(0) * data;
-    //         for (size_t i = 1; i <= m_nFilteredData; ++i) {
-    //             m_filteredData.row(m_nFilteredData).noalias() += m_bCoeff(i) * m_rawData.row(i - 1);
-    //         }
-    //         ++m_nFilteredData;
-    //     }
+    double filtData = 0.;
+    m_rawData[0] = data;
 
-    //     if (m_nFilteredData >= m_order) {
+    for (size_t k = 0; k < m_bCoeff.size(); ++k)
+        filtData += m_bCoeff[k] * m_rawData[k];
+    for (size_t k = 1; k < m_aCoeff.size(); ++k)
+        filtData -= m_aCoeff[k] * m_filteredData[k];
 
-    //     } else {
-    //         for (size_t i = 0; i < m_nFilteredData; ++i) {
-    //         }
+    m_filteredData[0] = filtData;
 
-    //         ++m_nFilteredData;
-    //     }
-    // }
+    return filtData;
+}
 
-    // https://stackoverflow.com/questions/50511549/meaning-of-rational-transfer-function-underlying-matlab-filter-or-scipy-signal-f
-    bool GenericFilter::stepFilter(double data)
-    {
-        double filtData;
-        for (size_t i = 0; i < m_nBCoeffFilteredData; ++i)
-            filtData += m_bCoeff[i] * m_rawData[m_nBCoeffFilteredData - i];
-        for (size_t i = 1; i < m_nACoeffFilteredData; ++i)
-            filtData -= m_aCoeff[i] * m_filteredData[m_nACoeffFilteredData - i];
+std::vector<double> GenericFilter::filter(const std::vector<double>& data)
+{
+    std::vector<double> results;
+    results.reserve(data.size());
 
-        m_filteredData[m_nACoeffFilteredData] = filtData;
-        m_rawData[m_nBCoeffFilteredData] = data;
-        ++m_nACoeffFilteredData;
-        ++m_nBCoeffFilteredData;
+    for (double d : data)
+        results.emplace_back(stepFilter(d));
 
-        if (m_nACoeffFilteredData == m_filteredData.size()) {
-            double* fd = m_filteredData.data();
-            for (size_t i = 0; i < m_filteredData.size() - 1; ++i)
-                *(fd) = *(++fd);
+    return results;
+}
 
-            --m_nACoeffFilteredData;
-        }
+void GenericFilter::resetFilter()
+{
+    m_filteredData.assign(m_aCoeff.size(), 0);
+    m_rawData.assign(m_bCoeff.size(), 0);
+}
 
-        if (m_nBCoeffFilteredData == m_rawData.size()) {
-            double* rd = m_rawData.data();
-            for (size_t i = 0; i < m_rawData.size() - 1; ++i)
-                *(rd) = *(++rd);
+void GenericFilter::normalize()
+{
+    double a0 = m_aCoeff.front();
+    if (std::abs(a0) < 1e-6) // Divide by zero
+        throw std::invalid_argument("By filtering value for coefficient a0. Should be superior to 1e-6");
 
-            --m_nBCoeffFilteredData;
-        }
-    }
+    for (double& a : m_aCoeff)
+        a /= a0;
+    for (double& b : m_bCoeff)
+        b /= a0;
+}
 
-    void GenericFilter::normalize()
-    {
-        double a0 = m_aCoeff.front();
-        if (std::abs(a0) < 1e-6) // Divide by zero
-            LOG_ERROR_AND_THROW(std::invalid_argument, "By filtering value for coefficient a0. Should be superior to 1e-6");
+void GenericFilter::checkCoeffs(const std::vector<double>& aCoeff, const std::vector<double>& bCoeff)
+{
+    std::stringstream err;
+    if (aCoeff.size() == 0)
+        err << "The size of coefficient 'a' should greater than 0\n";
+    if (bCoeff.size() == 0)
+        err << "The size of coefficient 'b' should greater than 0\n";
 
-        for (double& a : m_aCoeff)
-            a /= a0;
-        for (double& b : m_bCoeff)
-            b /= a0;
-    }
+    if (err.str().size() > 0)
+        throw std::runtime_error(err.str());
+}
 
-} // namespace filt
-
-} // namespace msfc
+} // namespace fratio
