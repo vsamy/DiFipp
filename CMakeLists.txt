@@ -1,5 +1,5 @@
 # Version minimum
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.0.2)
 
 include(cmake/base.cmake)
 include(cmake/eigen.cmake)
@@ -26,11 +26,13 @@ if(MSVC)
     set(CMAKE_MSVCIDE_RUN_PATH "\$(SolutionDir)/src/\$(Configuration)")
 endif()
 
-# Eigen
-set(Eigen_REQUIRED "eigen3 >= 3.3")
-search_for_eigen()
+add_compile_options("-D_USE_MATH_DEFINES")
 
-add_subdirectory(src)
+# Eigen
+# set(Eigen_REQUIRED "eigen3 >= 3.3")
+# search_for_eigen()
+
+add_subdirectory(include)
 
 if(NOT ${DISABLE_TESTS})
     add_subdirectory(tests)
