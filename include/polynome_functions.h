@@ -18,8 +18,8 @@ struct VietaAlgo<T> {
 template <typename T>
 std::vector<T> VietaAlgo<T>::polyCoeffFromRoot(const std::vector<T>& poles)
 {
-    std::vector<T> coeff(poles.size() + 1, T(0));
-    coeff[0] = T(1);
+    std::vector<T> coeff(poles.size() + 1, 0);
+    coeff[0] = 1;
     for (size_t i = 0; i < poles.size(); ++i) {
         for (size_t k = i + 1; k > 0; --k) {
             coeff[k] = coeff[k] - poles[i] * coeff[k - 1];

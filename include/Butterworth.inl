@@ -48,17 +48,17 @@ void Butterworth<T>::computeDigitalRep()
     T pi = static_cast<T>(M_PI);
     // Continuous pre-warped frequency
     T fpw = (m_fs / pi) * std::tan(pi * m_fc / m_fs);
-    T scaleFactor = T(2) * pi * fpw;
+    T scaleFactor = 2 * pi * fpw;
 
     auto thetaK = [pi, order = m_order](size_t k) -> T {
-        return (T(2) * k - T(1)) * pi / (T(2) * order);
+        return (2 * k - 1) * pi / (2 * order);
     };
 
     // Compute poles
     std::complex<T> scalePole;
     for (size_t k = 1; k <= m_order; ++k) {
         scalePole = scaleFactor * std::complex<T>(-std::sin(thetaK(k)), std::cos(thetaK(k)));
-        scalePole /= T(2) * m_fs;
+        scalePole /= 2 * m_fs;
         m_poles[k - 1] = (T(1) + scalePole) / (T(1) - scalePole);
     }
 

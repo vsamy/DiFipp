@@ -12,32 +12,32 @@ struct System {
 
 BOOST_FIXTURE_TEST_CASE(MOVING_AVERAGE_FLOAT, System<float>)
 {
-    auto ma = fratio::MovingAveragef(windowSize);
+    auto maf = fratio::MovingAveragef(windowSize);
     std::vector<float> filteredData;
     for (float d : data)
-        filteredData.push_back(ma.stepFilter(d));
+        filteredData.push_back(maf.stepFilter(d));
 
     for (size_t i = 0; i < filteredData.size(); ++i)
         BOOST_CHECK_SMALL(std::abs(filteredData[i] - results[i]), 1e-6f);
 
-    ma.resetFilter();
-    filteredData = ma.filter(data);
+    maf.resetFilter();
+    filteredData = maf.filter(data);
     for (size_t i = 0; i < filteredData.size(); ++i)
         BOOST_CHECK_SMALL(std::abs(filteredData[i] - results[i]), 1e-6f);
 }
 
 BOOST_FIXTURE_TEST_CASE(MOVING_AVERAGE_DOUBLE, System<double>)
 {
-    auto ma = fratio::MovingAveraged(windowSize);
+    auto maf = fratio::MovingAveraged(windowSize);
     std::vector<double> filteredData;
     for (double d : data)
-        filteredData.push_back(ma.stepFilter(d));
+        filteredData.push_back(maf.stepFilter(d));
 
     for (size_t i = 0; i < filteredData.size(); ++i)
         BOOST_CHECK_SMALL(std::abs(filteredData[i] - results[i]), 1e-14);
 
-    ma.resetFilter();
-    filteredData = ma.filter(data);
+    maf.resetFilter();
+    filteredData = maf.filter(data);
     for (size_t i = 0; i < filteredData.size(); ++i)
         BOOST_CHECK_SMALL(std::abs(filteredData[i] - results[i]), 1e-14);
 }

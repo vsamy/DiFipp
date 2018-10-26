@@ -70,7 +70,7 @@ void GenericFilter<T>::normalize()
     if (std::abs(a0) < 1e-8) // Divide by zero
         throw std::invalid_argument("By filtering value for coefficient a0. Should be superior to 1e-8");
 
-    if (std::abs(a0 - T(1)) < 1e-8)
+    if (std::abs(a0 - 1) < 1e-8)
         return;
 
     for (T& a : m_aCoeff)

@@ -18,40 +18,40 @@ DISABLE_CONVERSION_WARNING_END
 
 BOOST_FIXTURE_TEST_CASE(DIGITAL_FILTER_FLOAT, System<float>)
 {
-    auto gf = fratio::DigitalFilterf(aCoeff, bCoeff);
-    BOOST_REQUIRE_EQUAL(aCoeff.size(), gf.aOrder());
-    BOOST_REQUIRE_EQUAL(bCoeff.size(), gf.bOrder());
+    auto df = fratio::DigitalFilterf(aCoeff, bCoeff);
+    BOOST_REQUIRE_EQUAL(aCoeff.size(), df.aOrder());
+    BOOST_REQUIRE_EQUAL(bCoeff.size(), df.bOrder());
 
     std::vector<float> filteredData;
 
     for (float d : data)
-        filteredData.push_back(gf.stepFilter(d));
+        filteredData.push_back(df.stepFilter(d));
 
     for (size_t i = 0; i < filteredData.size(); ++i)
         BOOST_CHECK_SMALL(std::abs(filteredData[i] - results[i]), 1e-6f);
 
-    gf.resetFilter();
-    filteredData = gf.filter(data);
+    df.resetFilter();
+    filteredData = df.filter(data);
     for (size_t i = 0; i < filteredData.size(); ++i)
         BOOST_CHECK_SMALL(std::abs(filteredData[i] - results[i]), 1e-6f);
 }
 
 BOOST_FIXTURE_TEST_CASE(DIGITAL_FILTER_DOUBLE, System<double>)
 {
-    auto gf = fratio::DigitalFilterd(aCoeff, bCoeff);
-    BOOST_REQUIRE_EQUAL(aCoeff.size(), gf.aOrder());
-    BOOST_REQUIRE_EQUAL(bCoeff.size(), gf.bOrder());
+    auto df = fratio::DigitalFilterd(aCoeff, bCoeff);
+    BOOST_REQUIRE_EQUAL(aCoeff.size(), df.aOrder());
+    BOOST_REQUIRE_EQUAL(bCoeff.size(), df.bOrder());
 
     std::vector<double> filteredData;
 
     for (double d : data)
-        filteredData.push_back(gf.stepFilter(d));
+        filteredData.push_back(df.stepFilter(d));
 
     for (size_t i = 0; i < filteredData.size(); ++i)
         BOOST_CHECK_SMALL(std::abs(filteredData[i] - results[i]), 1e-14);
 
-    gf.resetFilter();
-    filteredData = gf.filter(data);
+    df.resetFilter();
+    filteredData = df.filter(data);
     for (size_t i = 0; i < filteredData.size(); ++i)
         BOOST_CHECK_SMALL(std::abs(filteredData[i] - results[i]), 1e-14);
 }

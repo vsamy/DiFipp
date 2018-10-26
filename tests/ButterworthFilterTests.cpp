@@ -21,10 +21,10 @@ DISABLE_CONVERSION_WARNING_END
 
 BOOST_FIXTURE_TEST_CASE(BUTTERWORTH_FILTER_FLOAT, System<float>)
 {
-    auto gf = fratio::Butterworthf(order, fc, fs);
+    auto bf = fratio::Butterworthf(order, fc, fs);
 
     std::vector<float> aCoeff, bCoeff, filteredData;
-    gf.getCoeff(aCoeff, bCoeff);
+    bf.getCoeff(aCoeff, bCoeff);
 
     BOOST_REQUIRE_EQUAL(aCoeff.size(), aCoeffRes.size());
     BOOST_REQUIRE_EQUAL(bCoeff.size(), bCoeffRes.size());
@@ -36,23 +36,33 @@ BOOST_FIXTURE_TEST_CASE(BUTTERWORTH_FILTER_FLOAT, System<float>)
     }
 
     for (float d : data)
-        filteredData.push_back(gf.stepFilter(d));
+        filteredData.push_back(bf.stepFilter(d));
 
     for (size_t i = 0; i < filteredData.size(); ++i)
         BOOST_CHECK_SMALL(std::abs(filteredData[i] - results[i]), 1e-4f);
 
-    gf.resetFilter();
-    filteredData = gf.filter(data);
+    bf.resetFilter();
+    filteredData = bf.filter(data);
+    for (size_t i = 0; i < filteredData.size(); ++i)
+        BOOST_CHECK_SMALL(std::abs(filteredData[i] - results[i]), 1e-4f);
+
+    auto bf2 = fratio::Butterworthf();
+
+    bf2.setFilterParameters(order, fc, fs);
+    filteredData.resize(0);
+    for (float d : data)
+        filteredData.push_back(bf2.stepFilter(d));
+
     for (size_t i = 0; i < filteredData.size(); ++i)
         BOOST_CHECK_SMALL(std::abs(filteredData[i] - results[i]), 1e-4f);
 }
 
 BOOST_FIXTURE_TEST_CASE(BUTTERWORTH_FILTER_DOUBLE, System<double>)
 {
-    auto gf = fratio::Butterworthd(order, fc, fs);
+    auto bf = fratio::Butterworthd(order, fc, fs);
 
     std::vector<double> aCoeff, bCoeff, filteredData;
-    gf.getCoeff(aCoeff, bCoeff);
+    bf.getCoeff(aCoeff, bCoeff);
 
     BOOST_REQUIRE_EQUAL(aCoeff.size(), aCoeffRes.size());
     BOOST_REQUIRE_EQUAL(bCoeff.size(), bCoeffRes.size());
@@ -64,13 +74,23 @@ BOOST_FIXTURE_TEST_CASE(BUTTERWORTH_FILTER_DOUBLE, System<double>)
     }
 
     for (double d : data)
-        filteredData.push_back(gf.stepFilter(d));
+        filteredData.push_back(bf.stepFilter(d));
 
     for (size_t i = 0; i < filteredData.size(); ++i)
         BOOST_CHECK_SMALL(std::abs(filteredData[i] - results[i]), 1e-14);
 
-    gf.resetFilter();
-    filteredData = gf.filter(data);
+    bf.resetFilter();
+    filteredData = bf.filter(data);
+    for (size_t i = 0; i < filteredData.size(); ++i)
+        BOOST_CHECK_SMALL(std::abs(filteredData[i] - results[i]), 1e-14);
+
+    auto bf2 = fratio::Butterworthd();
+
+    bf2.setFilterParameters(order, fc, fs);
+    filteredData.resize(0);
+    for (float d : data)
+        filteredData.push_back(bf2.stepFilter(d));
+
     for (size_t i = 0; i < filteredData.size(); ++i)
         BOOST_CHECK_SMALL(std::abs(filteredData[i] - results[i]), 1e-14);
 }
