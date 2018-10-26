@@ -1,3 +1,4 @@
+#include "BilinearTransform.h"
 #include "polynome_functions.h"
 #include <cmath>
 #include <sstream>
@@ -58,8 +59,7 @@ void Butterworth<T>::computeDigitalRep()
     std::complex<T> scalePole;
     for (size_t k = 1; k <= m_order; ++k) {
         scalePole = scaleFactor * std::complex<T>(-std::sin(thetaK(k)), std::cos(thetaK(k)));
-        scalePole /= 2 * m_fs;
-        m_poles[k - 1] = (T(1) + scalePole) / (T(1) - scalePole);
+        BilinearTransform<std::complex<T>>::SToZ(m_fs, scalePole, m_poles[k - 1]);
     }
 
     std::vector<std::complex<T>> numPoles(m_order, std::complex<T>(-1));
@@ -87,6 +87,19 @@ void Butterworth<T>::updateCoeffSize()
     m_aCoeff.resize(m_order + 1);
     m_bCoeff.resize(m_order + 1);
     resetFilter();
+}
+
+template <typename T>
+void Butterworth<T>::transformFilter()
+{
+    switch (m_type) {
+    case Type::HighPass:
+        break;
+
+    case Type::LowPass:
+    default:
+        break;
+    }
 }
 
 } // namespace fratio

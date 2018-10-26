@@ -8,7 +8,7 @@ DISABLE_CONVERSION_WARNING_BEGIN
 
 template <typename T>
 struct System {
-    std::vector<T> data = { 1., 2., 3., 4., 5., 6., 7., 8. };
+    std::vector<T> data = { 1, 2, 3, 4, 5, 6, 7, 8 };
     size_t order = 5;
     T fc = 10;
     T fs = 100;
@@ -88,7 +88,7 @@ BOOST_FIXTURE_TEST_CASE(BUTTERWORTH_FILTER_DOUBLE, System<double>)
 
     bf2.setFilterParameters(order, fc, fs);
     filteredData.resize(0);
-    for (float d : data)
+    for (double d : data)
         filteredData.push_back(bf2.stepFilter(d));
 
     for (size_t i = 0; i < filteredData.size(); ++i)

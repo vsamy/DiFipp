@@ -5,7 +5,7 @@
 
 template <typename T>
 struct System {
-    std::vector<T> data = { 1., 2., 3., 4., 5., 6. };
+    std::vector<T> data = { 1, 2, 3, 4, 5, 6 };
     size_t windowSize = 4;
     std::vector<T> results = { 0.25, 0.75, 1.5, 2.5, 3.5, 4.5 };
 };

@@ -8,8 +8,8 @@ DISABLE_CONVERSION_WARNING_BEGIN
 
 template <typename T>
 struct System {
-    std::vector<T> data = { 1., 2., 3., 4. };
-    std::vector<T> aCoeff = { 1., -0.99993717 };
+    std::vector<T> data = { 1, 2, 3, 4 };
+    std::vector<T> aCoeff = { 1, -0.99993717 };
     std::vector<T> bCoeff = { 0.99996859, -0.99996859 };
     std::vector<T> results = { 0.99996859, 1.999874351973491, 2.999717289867956, 3.999497407630634 };
 };

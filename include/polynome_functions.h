@@ -6,11 +6,10 @@
 
 namespace fratio {
 
-template <typename T, typename = std::enable_if_t<std::is_arithmetic<T>::value || is_complex_t<T>::value>>
-struct VietaAlgo;
-
 template <typename T>
-struct VietaAlgo<T> {
+struct VietaAlgo {
+    static_assert(std::is_arithmetic<internal::complex_sub_type_t<T>>::value, "This struct can only accept arithmetic types or complex.");
+
     // Vieta's computation: https://en.wikipedia.org/wiki/Vieta%27s_formulas
     static std::vector<T> polyCoeffFromRoot(const std::vector<T>& poles);
 };

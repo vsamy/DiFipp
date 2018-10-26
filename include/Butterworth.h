@@ -11,7 +11,8 @@ template <typename T>
 class Butterworth : public GenericFilter<T> {
 public:
     enum class Type {
-        LowPass
+        LowPass,
+        HighPass
     };
 
     // public:
@@ -26,6 +27,7 @@ private:
     void initialize(size_t order, T fc, T fs);
     void computeDigitalRep();
     void updateCoeffSize();
+    void transformFilter();
 
 private:
     Type m_type;

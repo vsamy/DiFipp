@@ -19,13 +19,13 @@ DISABLE_CONVERSION_WARNING_BEGIN
 template <typename T>
 struct SystemFloat {
     std::vector<T> data = { 0.32, -0.0518, 41.4, 0.89 };
-    std::vector<T> results = { 1., -42.558199999999999, 48.171601999999993, -9.181098159999999, -0.610759296 };
+    std::vector<T> results = { 1, -42.558199999999999, 48.171601999999993, -9.181098159999999, -0.610759296 };
 };
 
 template <typename T>
 struct SystemCFloat {
     std::vector<std::complex<T>> data = { { 1.35, 0.2 }, { -1.5, 4.45 }, { 12.8, -3.36 }, { 5.156, 2.12 } };
-    std::vector<std::complex<T>> results = { { 1., 0. }, { -17.806, -3.41 }, { 73.2776, 99.20074 }, { 101.857496, -444.634694 }, { -269.1458768, 388.7308864 } };
+    std::vector<std::complex<T>> results = { { 1, 0 }, { -17.806, -3.41 }, { 73.2776, 99.20074 }, { 101.857496, -444.634694 }, { -269.1458768, 388.7308864 } };
 };
 
 DISABLE_CONVERSION_WARNING_END

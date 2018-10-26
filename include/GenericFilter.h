@@ -6,11 +6,10 @@
 
 namespace fratio {
 
-template <typename T, typename = std::enable_if_t<std::is_floating_point<T>::value && !std::is_const<T>::value>>
-class GenericFilter;
-
 template <typename T>
-class GenericFilter<T> {
+class GenericFilter {
+    static_assert(std::is_floating_point<T>::value && !std::is_const<T>::value, "Only accept non-complex floating point types.");
+
 public:
     T stepFilter(T data);
     std::vector<T> filter(const std::vector<T>& data);
