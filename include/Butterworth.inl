@@ -38,7 +38,6 @@ void Butterworth<T>::initialize(size_t order, T fc, T fs)
     m_order = order;
     m_fc = fc;
     m_fs = fs;
-    m_poles.resize(order);
     updateCoeffSize();
     computeDigitalRep();
 }
@@ -46,38 +45,26 @@ void Butterworth<T>::initialize(size_t order, T fc, T fs)
 template <typename T>
 void Butterworth<T>::computeDigitalRep()
 {
-    T pi = static_cast<T>(M_PI);
     // Continuous pre-warped frequency
-    T fpw = (m_fs / pi) * std::tan(pi * m_fc / m_fs);
-    T scaleFactor = 2 * pi * fpw;
-
-    auto thetaK = [pi, order = m_order](size_t k) -> T {
-        return (2 * k - 1) * pi / (2 * order);
-    };
+    T fpw = (m_fs / PI) * std::tan(PI * m_fc / m_fs);
 
     // Compute poles
-    std::complex<T> scalePole;
+    std::complex<T> analogPole;
+    std::vector<std::complex<T>> poles(m_order);
     for (size_t k = 1; k <= m_order; ++k) {
-        scalePole = scaleFactor * std::complex<T>(-std::sin(thetaK(k)), std::cos(thetaK(k)));
-        BilinearTransform<std::complex<T>>::SToZ(m_fs, scalePole, m_poles[k - 1]);
+        analogPole = generateAnalogPole(fpw, k);
+        BilinearTransform<std::complex<T>>::SToZ(m_fs, analogPole, poles[k - 1]);
     }
 
-    std::vector<std::complex<T>> numPoles(m_order, std::complex<T>(-1));
-    std::vector<std::complex<T>> a = VietaAlgo<std::complex<T>>::polyCoeffFromRoot(m_poles);
-    std::vector<std::complex<T>> b = VietaAlgo<std::complex<T>>::polyCoeffFromRoot(numPoles);
-    T norm = 0;
-    T sumB = 0;
+    std::vector<std::complex<T>> zeros = generateAnalogZeros();
+    std::vector<std::complex<T>> a = VietaAlgo<std::complex<T>>::polyCoeffFromRoot(poles);
+    std::vector<std::complex<T>> b = VietaAlgo<std::complex<T>>::polyCoeffFromRoot(zeros);
     for (size_t i = 0; i < m_order + 1; ++i) {
         m_aCoeff[i] = a[i].real();
         m_bCoeff[i] = b[i].real();
-        norm += m_aCoeff[i];
-        sumB += m_bCoeff[i];
     }
 
-    norm /= sumB;
-    for (auto& b : m_bCoeff)
-        b *= norm;
-
+    scaleAmplitude();
     checkCoeff(m_aCoeff, m_bCoeff);
 }
 
@@ -90,16 +77,69 @@ void Butterworth<T>::updateCoeffSize()
 }
 
 template <typename T>
-void Butterworth<T>::transformFilter()
+std::complex<T> Butterworth<T>::generateAnalogPole(T fpw, size_t k)
+{
+    T scaleFactor = 2 * PI * fpw;
+
+    auto thetaK = [pi = PI, order = m_order](size_t k) -> T {
+        return (2 * k - 1) * pi / (2 * order);
+    };
+
+    std::complex<T> analogPole(-std::sin(thetaK(k)), std::cos(thetaK(k)));
+    switch (m_type) {
+    case Type::HighPass:
+        return scaleFactor / analogPole;
+
+    case Type::LowPass:
+    default:
+        return scaleFactor * analogPole;
+    }
+}
+
+template <typename T>
+std::vector<std::complex<T>> Butterworth<T>::generateAnalogZeros()
 {
     switch (m_type) {
     case Type::HighPass:
+        return std::vector<std::complex<T>>(m_order, std::complex<T>(1));
+
+    case Type::LowPass:
+    default:
+        return std::vector<std::complex<T>>(m_order, std::complex<T>(-1));
+    }
+}
+
+template <typename T>
+void Butterworth<T>::scaleAmplitude()
+{
+    T scale = 0;
+    T sumB = 0;
+
+    switch (m_type) {
+    case Type::HighPass:
+        for (size_t i = 0; i < m_order + 1; ++i) {
+            if (i % 2 == 0) {
+                scale += m_aCoeff[i];
+                sumB += m_bCoeff[i];
+            } else {
+                scale -= m_aCoeff[i];
+                sumB -= m_bCoeff[i];
+            }
+        }
         break;
 
     case Type::LowPass:
     default:
+        for (size_t i = 0; i < m_order + 1; ++i) {
+            scale += m_aCoeff[i];
+            sumB += m_bCoeff[i];
+        }
         break;
     }
+
+    scale /= sumB;
+    for (auto& b : m_bCoeff)
+        b *= scale;
 }
 
 } // namespace fratio
