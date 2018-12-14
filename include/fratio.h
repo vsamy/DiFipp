@@ -15,18 +15,18 @@ using MovingAveraged = MovingAverage<double>;
 using Butterworthf = Butterworth<float>;
 using Butterworthd = Butterworth<double>;
 
-// Polynome helper functions
-using VietaAlgof = VietaAlgo<float>;
-using VietaAlgod = VietaAlgo<double>;
-using VietaAlgoi = VietaAlgo<int>;
-using VietaAlgocf = VietaAlgo<std::complex<float>>;
-using VietaAlgocd = VietaAlgo<std::complex<double>>;
-using VietaAlgoci = VietaAlgo<std::complex<int>>;
+// // Polynome helper functions
+// using VietaAlgof = VietaAlgo<float>;
+// using VietaAlgod = VietaAlgo<double>;
+// using VietaAlgoi = VietaAlgo<int>;
+// using VietaAlgocf = VietaAlgo<std::complex<float>>;
+// using VietaAlgocd = VietaAlgo<std::complex<double>>;
+// using VietaAlgoci = VietaAlgo<std::complex<int>>;
 
-// Bilinear transformation functions
-using BilinearTransformf = BilinearTransform<float>;
-using BilinearTransformd = BilinearTransform<double>;
-using BilinearTransformcf = BilinearTransform<std::complex<float>>;
-using BilinearTransformcd = BilinearTransform<std::complex<double>>;
+// // Bilinear transformation functions
+// using BilinearTransformf = BilinearTransform<float>;
+// using BilinearTransformd = BilinearTransform<double>;
+// using BilinearTransformcf = BilinearTransform<std::complex<float>>;
+// using BilinearTransformcd = BilinearTransform<std::complex<double>>;
 
 } // namespace fratio

@@ -1,6 +1,7 @@
 #pragma once
 
-#include <vector>
+#include "type_checks.h"
+#include "typedefs.h"
 
 namespace fratio {
 
@@ -10,9 +11,9 @@ struct BilinearTransform {
     static_assert(std::is_floating_point<SubType>::value, "This struct can only accept floating point types (real and complex).");
 
     static void SToZ(SubType fs, const T& sPlanePole, T& zPlanePole);
-    static void SToZ(SubType fs, const std::vector<T>& sPlanePoles, std::vector<T>& zPlanePoles);
+    static void SToZ(SubType fs, const Eigen::VectorX<T>& sPlanePoles, Eigen::VectorX<T>& zPlanePoles); // Can be optimized
     static void ZToS(SubType fs, const T& zPlanePole, T& sPlanePole);
-    static void ZToS(SubType fs, const std::vector<T>& zPlanePoles, std::vector<T>& sPlanePoles);
+    static void ZToS(SubType fs, const Eigen::VectorX<T>& zPlanePoles, Eigen::VectorX<T>& sPlanePoles); // Can be optimized
 };
 
 template <typename T>
@@ -23,7 +24,7 @@ void BilinearTransform<T>::SToZ(SubType fs, const T& sPlanePole, T& zPlanePole)
 }
 
 template <typename T>
-void BilinearTransform<T>::SToZ(SubType fs, const std::vector<T>& sPlanePoles, std::vector<T>& zPlanePoles)
+void BilinearTransform<T>::SToZ(SubType fs, const Eigen::VectorX<T>& sPlanePoles, Eigen::VectorX<T>& zPlanePoles)
 {
     assert(sPlanePoles.size() == zPlanePoles.size());
     for (size_t k = 0; k < sPlanePoles.size(); ++k)
@@ -38,7 +39,7 @@ void BilinearTransform<T>::ZToS(SubType fs, const T& zPlanePole, T& sPlanePole)
 }
 
 template <typename T>
-void BilinearTransform<T>::ZToS(SubType fs, const std::vector<T>& zPlanePoles, std::vector<T>& sPlanePoles)
+void BilinearTransform<T>::ZToS(SubType fs, const Eigen::VectorX<T>& zPlanePoles, Eigen::VectorX<T>& sPlanePoles)
 {
     assert(zPlanePoles.size() == sPlanePoles.size());
     for (size_t k = 0; k < sPlanePoles.size(); ++k)

@@ -4,7 +4,6 @@
 #include "typedefs.h"
 #include <stddef.h>
 #include <string>
-#include <vector>
 
 namespace fratio {
 
@@ -22,9 +21,7 @@ public:
     bool getFilterResults(Eigen::Ref<Eigen::VectorX<T>> results, const Eigen::VectorX<T>& data);
     void resetFilter();
 
-    bool setCoeffs(const std::vector<T>& aCoeff, const std::vector<T>& bCoeff);
     bool setCoeffs(const Eigen::VectorX<T>& aCoeff, const Eigen::VectorX<T>& bCoeff);
-    void getCoeffs(std::vector<T>& aCoeff, std::vector<T>& bCoeff) const;
     void getCoeffs(Eigen::Ref<Eigen::VectorX<T>> aCoeff, Eigen::Ref<Eigen::VectorX<T>> bCoeff) const;
     FilterStatus status() const noexcept { return m_status; }
 
@@ -34,8 +31,7 @@ protected:
     virtual ~GenericFilter() = default;
 
     void normalizeCoeffs();
-    template <typename T2>
-    bool checkCoeffs(const T2& aCoeff, const T2& bCoeff);
+    bool checkCoeffs(const Eigen::VectorX<T>& aCoeff, const Eigen::VectorX<T>& bCoeff);
 
 protected:
     FilterStatus m_status;

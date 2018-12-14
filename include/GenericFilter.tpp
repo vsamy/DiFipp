@@ -32,10 +32,8 @@ T GenericFilter<T>::stepFilter(const T& data)
     assert(m_status == FilterStatus::READY);
 
     // Slide data (can't use SIMD, but should be small)
-    for (auto rit1 = m_rawData.rbegin(), rit2 = m_rawData.rbegin() + 1; rit2 != m_rawData.rend(); ++rit1, ++rit2)
-        *rit1 = *rit2;
-    for (auto rit1 = m_filteredData.rbegin(), rit2 = m_filteredData.rbegin() + 1; rit2 != m_filteredData.rend(); ++rit1, ++rit2)
-        *rit1 = *rit2;
+    m_rawData.tail(m_rawData.size() - 1) = m_rawData.head(m_rawData.size() - 1);
+    m_filteredData.tail(m_rawData.size() - 1) = m_filteredData.head(m_rawData.size() - 1);
 
     m_rawData[0] = data;
     m_filteredData[0] = m_bCoeff.dot(m_rawData) - m_aCoeff.dot(m_filteredData);
@@ -59,9 +57,8 @@ bool GenericFilter<T>::getFilterResults(Eigen::Ref<Eigen::VectorX<T>> results, c
     if (results.size() != data.size())
         return false;
 
-    T* res = results.data();
-    for (T d : data)
-        *(res++) = stepFilter(d);
+    for (Eigen::Index i = 0; i < data.size(); ++i)
+        results(i) = stepFilter(data(i));
 
     return true;
 }
@@ -74,20 +71,7 @@ void GenericFilter<T>::resetFilter()
 }
 
 template <typename T>
-bool GenericFilter<T>::setCoeffs(const std::vector<T>& aCoeff, const std::vector<T>& bCoeff)
-{
-    if (!checkCoeffs(aCoeff, bCoeff))
-        return false;
-
-    m_aCoeff = Eigen::Map<Eigen::VectorX<T>>(aCoeff.data(), aCoeff.size());
-    m_bCoeff = Eigen::Map<Eigen::VectorX<T>>(bCoeff.data(), bCoeff.size());
-    resetFilter();
-    normalizeCoeffs();
-    return true;
-}
-
-template <typename T>
-void GenericFilter<T>::setCoeffs(const Eigen::VectorX<T>& aCoeff, const Eigen::VectorX<T>& bCoeff)
+bool GenericFilter<T>::setCoeffs(const Eigen::VectorX<T>& aCoeff, const Eigen::VectorX<T>& bCoeff)
 {
     if (!checkCoeffs(aCoeff, bCoeff))
         return false;
@@ -97,13 +81,6 @@ void GenericFilter<T>::setCoeffs(const Eigen::VectorX<T>& aCoeff, const Eigen::V
     resetFilter();
     normalizeCoeffs();
     return true;
-}
-
-template <typename T>
-void GenericFilter<T>::getCoeffs(std::vector<T>& aCoeff, std::vector<T>& bCoeff) const
-{
-    aCoeff.assign(m_aCoeff.data(), m_aCoeff.data() + m_aCoeff.size());
-    bCoeff.assign(m_bCoeff.data(), m_bCoeff.data() + m_bCoeff.size());
 }
 
 template <typename T>
@@ -122,7 +99,7 @@ GenericFilter<T>::GenericFilter(const Eigen::VectorX<T>& aCoeff, const Eigen::Ve
     , m_filteredData(aCoeff.size())
     , m_rawData(bCoeff.size())
 {
-    if(!checkCoeffs(aCoeff, bCoeff))
+    if (!checkCoeffs(aCoeff, bCoeff))
         return;
 
     resetFilter();
@@ -143,24 +120,21 @@ void GenericFilter<T>::normalizeCoeffs()
 }
 
 template <typename T>
-template <typename T2>
-bool GenericFilter<T>::checkCoeffs(const T2& aCoeff, const T2& bCoeff)
+bool GenericFilter<T>::checkCoeffs(const Eigen::VectorX<T>& aCoeff, const Eigen::VectorX<T>& bCoeff)
 {
-    using namespace FilterStatus;
-
-    m_status = NONE;
+    m_status = FilterStatus::NONE;
     if (aCoeff.size() == 0)
-        m_status = A_COEFF_MISSING;
+        m_status = FilterStatus::A_COEFF_MISSING;
     else if (std::abs(aCoeff[0]) < std::numeric_limits<T>::epsilon())
-        m_status = BAD_A_COEFF;
+        m_status = FilterStatus::BAD_A_COEFF;
 
     if (bCoeff.size() == 0)
-        m_status = (m_status == A_COEFF_MISSING ? ALL_COEFF_MISSING : B_COEFF_MISSING);
+        m_status = (m_status == FilterStatus::A_COEFF_MISSING ? FilterStatus::ALL_COEFF_MISSING : FilterStatus::B_COEFF_MISSING);
 
-    if (m_status == NONE)
-        m_status = READY;
+    if (m_status == FilterStatus::NONE)
+        m_status = FilterStatus::READY;
 
-    return m_status == READY;
+    return m_status == FilterStatus::READY;
 }
 
 } // namespace fratio

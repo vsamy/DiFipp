@@ -1,9 +1,11 @@
 set(HEADERS
+    BilinearTransform.h
     Butterworth.h
     DigitalFilter.h
     GenericFilter.h
     MovingAverage.h
     polynome_functions.h
+    typedefs.h
 )
 
 add_library(${PROJECT_NAME} INTERFACE)

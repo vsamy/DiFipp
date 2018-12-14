@@ -5,39 +5,39 @@
 
 template <typename T>
 struct System {
-    std::vector<T> data = { 1, 2, 3, 4, 5, 6 };
+    Eigen::VectorX<T> data = (Eigen::VectorX<T>(6) << 1, 2, 3, 4, 5, 6).finished();
     size_t windowSize = 4;
-    std::vector<T> results = { 0.25, 0.75, 1.5, 2.5, 3.5, 4.5 };
+    Eigen::VectorX<T> results = (Eigen::VectorX<T>(6) << 0.25, 0.75, 1.5, 2.5, 3.5, 4.5).finished();
 };
 
 BOOST_FIXTURE_TEST_CASE(MOVING_AVERAGE_FLOAT, System<float>)
 {
     auto maf = fratio::MovingAveragef(windowSize);
     std::vector<float> filteredData;
-    for (float d : data)
-        filteredData.push_back(maf.stepFilter(d));
+    for (Eigen::Index i = 0; i < data.size(); ++i)
+        filteredData.push_back(maf.stepFilter(data(i)));
 
     for (size_t i = 0; i < filteredData.size(); ++i)
         BOOST_CHECK_SMALL(std::abs(filteredData[i] - results[i]), 1e-6f);
 
     maf.resetFilter();
-    filteredData = maf.filter(data);
-    for (size_t i = 0; i < filteredData.size(); ++i)
-        BOOST_CHECK_SMALL(std::abs(filteredData[i] - results[i]), 1e-6f);
+    Eigen::VectorXf fData = maf.filter(data);
+    for (Eigen::Index i = 0; i < fData.size(); ++i)
+        BOOST_CHECK_SMALL(std::abs(fData(i) - results(i)), 1e-6f);
 }
 
 BOOST_FIXTURE_TEST_CASE(MOVING_AVERAGE_DOUBLE, System<double>)
 {
     auto maf = fratio::MovingAveraged(windowSize);
     std::vector<double> filteredData;
-    for (double d : data)
-        filteredData.push_back(maf.stepFilter(d));
+    for (Eigen::Index i = 0; i < data.size(); ++i)
+        filteredData.push_back(maf.stepFilter(data(i)));
 
     for (size_t i = 0; i < filteredData.size(); ++i)
         BOOST_CHECK_SMALL(std::abs(filteredData[i] - results[i]), 1e-14);
 
     maf.resetFilter();
-    filteredData = maf.filter(data);
-    for (size_t i = 0; i < filteredData.size(); ++i)
-        BOOST_CHECK_SMALL(std::abs(filteredData[i] - results[i]), 1e-14);
+    Eigen::VectorXd fData = maf.filter(data);
+    for (Eigen::Index i = 0; i < fData.size(); ++i)
+        BOOST_CHECK_SMALL(std::abs(fData(i) - results(i)), 1e-14);
 }

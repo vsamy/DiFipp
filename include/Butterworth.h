@@ -2,6 +2,7 @@
 
 #include "GenericFilter.h"
 #include "typedefs.h"
+#include <cmath>
 #include <complex>
 
 namespace fratio {
@@ -31,7 +32,7 @@ private:
     void computeDigitalRep();
     void updateCoeffSize();
     std::complex<T> generateAnalogPole(T fpw, size_t k);
-    std::vector<std::complex<T>> generateAnalogZeros();
+    Eigen::VectorX<std::complex<T>> generateAnalogZeros();
     void scaleAmplitude();
 
 private:
