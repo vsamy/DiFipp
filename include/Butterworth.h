@@ -1,14 +1,14 @@
 #pragma once
 
 #include "GenericFilter.h"
+#include "typedefs.h"
 #include <complex>
-#include <vector>
 
 namespace fratio {
 
 // https://www.dsprelated.com/showarticle/1119.php
 template <typename T>
-class Butterworth : public GenericFilter<T> {
+class Butterworth : public DigitalFilter<T> {
 public:
     T PI = static_cast<T>(M_PI);
 
@@ -39,8 +39,9 @@ private:
     size_t m_order;
     T m_fc;
     T m_fs;
+    Eigen::VectorX<std::complex<T>> m_poles;
 };
 
 } // namespace fratio
 
-#include "Butterworth.inl"
+#include "Butterworth.tpp"

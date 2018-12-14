@@ -1,20 +1,27 @@
 #pragma once
 
-#include "GenericFilter.h"
+#include "DigitalFilter.h"
+#include "typedefs.h"
 
 namespace fratio {
 
 template <typename T>
-class MovingAverage : public GenericFilter<T> {
+class MovingAverage : public DigitalFilter<T> {
 public:
     MovingAverage() = default;
     MovingAverage(size_t windowSize)
-        : GenericFilter<T>({ 1 }, std::vector<T>(windowSize, T(1) / windowSize))
+        : DigitalFilter<T>(Eigen::VectorX<T>::Constant(1, T(1)), Eigen::VectorX<T>::Constant(windowSize, T(1) / windowSize)))
     {
     }
 
-    void setWindowSize(size_t windowSize) { setCoeff({ 1 }, std::vector<T>(windowSize, 1 / windowSize)); }
-    size_t windowSize() const noexcept { return m_bCoeff.size(); }
+    void setWindowSize(size_t windowSize) { setCoeffs(Eigen::VectorX<T>::Constant(1, T(1)), Eigen::VectorX<T>::Constant(windowSize, T(1) / windowSize)); }
+    size_t windowSize() const noexcept { return bOrder(); }
+        : DigitalFilter<T>(Eigen::VectorX<T>::Constant(1, T(1)), Eigen::VectorX<T>::Constant(windowSize, T(1) / windowSize)))
+    {
+    }
+
+    void setWindowSize(size_t windowSize) { setCoeffs(Eigen::VectorX<T>::Constant(1, T(1)), Eigen::VectorX<T>::Constant(windowSize, T(1) / windowSize)); }
+    size_t windowSize() const noexcept { return bOrder(); }
 };
 
 } // namespace fratio

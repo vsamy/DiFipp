@@ -29,8 +29,8 @@ endif()
 add_compile_options("-D_USE_MATH_DEFINES")
 
 # Eigen
-# set(Eigen_REQUIRED "eigen3 >= 3.3")
-# search_for_eigen()
+set(Eigen_REQUIRED "eigen3 >= 3.3")
+search_for_eigen()
 
 add_subdirectory(include)
 
