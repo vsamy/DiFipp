@@ -10,21 +10,31 @@ Butterworth<T>::Butterworth(Type type)
 }
 
 template <typename T>
-Butterworth<T>::Butterworth(size_t order, T fc, T fs, Type type)
+Butterworth<T>::Butterworth(int order, T fc, T fs, Type type)
     : m_type(type)
 {
     initialize(order, fc, fs);
 }
 
 template <typename T>
-void Butterworth<T>::setFilterParameters(size_t order, T fc, T fs)
+void Butterworth<T>::setFilterParameters(int order, T fc, T fs)
 {
     initialize(order, fc, fs);
 }
 
 template <typename T>
-void Butterworth<T>::initialize(size_t order, T fc, T fs)
+void Butterworth<T>::initialize(int order, T fc, T fs)
 {
+    if (order <= 0) {
+        m_status = FilterStatus::BAD_ORDER_SIZE;
+        return;
+    }
+
+    if (fc <= 0 || fs <= 0) {
+        m_status = FilterStatus::BAD_FREQUENCY_VALUE;
+        return;
+    }
+
     if (m_fc > m_fs / 2.) {
         m_status = FilterStatus::BAD_CUTOFF_FREQUENCY;
         return;
@@ -33,8 +43,8 @@ void Butterworth<T>::initialize(size_t order, T fc, T fs)
     m_order = order;
     m_fc = fc;
     m_fs = fs;
-    updateCoeffSize();
     computeDigitalRep();
+    resetFilter();
 }
 
 template <typename T>
@@ -46,37 +56,31 @@ void Butterworth<T>::computeDigitalRep()
     // Compute poles
     std::complex<T> analogPole;
     Eigen::VectorX<std::complex<T>> poles(m_order);
-    for (size_t k = 1; k <= m_order; ++k) {
+    for (int k = 1; k <= m_order; ++k) {
         analogPole = generateAnalogPole(fpw, k);
-        BilinearTransform<std::complex<T>>::SToZ(m_fs, analogPole, poles[k - 1]);
+        BilinearTransform<std::complex<T>>::SToZ(m_fs, analogPole, poles(k - 1));
     }
 
     Eigen::VectorX<std::complex<T>> zeros = generateAnalogZeros();
     Eigen::VectorX<std::complex<T>> a = VietaAlgo<std::complex<T>>::polyCoeffFromRoot(poles);
     Eigen::VectorX<std::complex<T>> b = VietaAlgo<std::complex<T>>::polyCoeffFromRoot(zeros);
-    for (size_t i = 0; i < m_order + 1; ++i) {
-        m_aCoeff[i] = a[i].real();
-        m_bCoeff[i] = b[i].real();
+    Eigen::VectorX<T> aCoeff(m_order + 1);
+    Eigen::VectorX<T> bCoeff(m_order + 1);
+    for (int i = 0; i < m_order + 1; ++i) {
+        aCoeff(i) = a(i).real();
+        bCoeff(i) = b(i).real();
     }
 
-    scaleAmplitude();
-    checkCoeff(m_aCoeff, m_bCoeff);
+    scaleAmplitude(aCoeff, bCoeff);
+    setCoeffs(std::move(aCoeff), std::move(bCoeff));
 }
 
 template <typename T>
-void Butterworth<T>::updateCoeffSize()
-{
-    m_aCoeff.resize(m_order + 1);
-    m_bCoeff.resize(m_order + 1);
-    resetFilter();
-}
-
-template <typename T>
-std::complex<T> Butterworth<T>::generateAnalogPole(T fpw, size_t k)
+std::complex<T> Butterworth<T>::generateAnalogPole(T fpw, int k)
 {
     T scaleFactor = 2 * PI * fpw;
 
-    auto thetaK = [pi = PI, order = m_order](size_t k) -> T {
+    auto thetaK = [pi = PI, order = m_order](int k) -> T {
         return (2 * k - 1) * pi / (2 * order);
     };
 
@@ -105,32 +109,32 @@ Eigen::VectorX<std::complex<T>> Butterworth<T>::generateAnalogZeros()
 }
 
 template <typename T>
-void Butterworth<T>::scaleAmplitude()
+void Butterworth<T>::scaleAmplitude(Eigen::Ref<Eigen::VectorX<T>> aCoeff, Eigen::Ref<Eigen::VectorX<T>> bCoeff)
 {
     T scale = 0;
     T sumB = 0;
 
     switch (m_type) {
     case Type::HighPass:
-        for (size_t i = 0; i < m_order + 1; ++i) {
+        for (int i = 0; i < m_order + 1; ++i) {
             if (i % 2 == 0) {
-                scale += m_aCoeff(i);
-                sumB += m_bCoeff(i);
+                scale += aCoeff(i);
+                sumB += bCoeff(i);
             } else {
-                scale -= m_aCoeff(i);
-                sumB -= m_bCoeff(i);
+                scale -= aCoeff(i);
+                sumB -= bCoeff(i);
             }
         }
         break;
 
     case Type::LowPass:
     default:
-        scale = m_aCoeff.sum();
-        sumB = m_bCoeff.sum();
+        scale = aCoeff.sum();
+        sumB = bCoeff.sum();
         break;
     }
 
-    m_bCoeff *= scale / sumB;
+    bCoeff *= scale / sumB;
 }
 
 } // namespace fratio

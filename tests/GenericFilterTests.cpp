@@ -1,7 +1,6 @@
 #define BOOST_TEST_MODULE GenericFilterTests
 
-#include "fratio.h"
-#include "typedefs.h"
+#include "fratio"
 #include <boost/test/unit_test.hpp>
 #include <vector>
 

@@ -13,9 +13,6 @@ public:
         : GenericFilter<T>(aCoeff, bCoeff)
     {
     }
-
-    size_t aOrder() const noexcept { return m_aCoeff.size(); }
-    size_t bOrder() const noexcept { return m_bCoeff.size(); }
 };
 
 } // namespace fratio

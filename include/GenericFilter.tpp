@@ -11,12 +11,16 @@ std::string GenericFilter<T>::filterStatus(FilterStatus status)
         return "Filter is uninitialized";
     case FilterStatus::READY:
         return "Filter is ready to be used";
+    case FilterStatus::BAD_ORDER_SIZE:
+        return "You try to initialize the filter with an order inferior or equal to 0 (window size for the moving average)";
     case FilterStatus::ALL_COEFF_MISSING:
         return "Filter has none of its coefficient initialized";
     case FilterStatus::A_COEFF_MISSING:
         return "Filter has its 'a' coefficients uninitialized";
     case FilterStatus::A_COEFF_MISSING:
         return "Filter has its 'b' coefficients uninitialized";
+    case FilterStatus::BAD_FREQUENCY_VALUE:
+        return "Filter has a received a frequency that is negative or equal to zero";
     case FilterStatus::BAD_CUTOFF_FREQUENCY:
         return "Filter has a received a bad cut-off frequency. It must be inferior to the sampling frequency";
     default:
@@ -71,8 +75,11 @@ void GenericFilter<T>::resetFilter()
 }
 
 template <typename T>
-bool GenericFilter<T>::setCoeffs(const Eigen::VectorX<T>& aCoeff, const Eigen::VectorX<T>& bCoeff)
+template <typename T2>
+bool GenericFilter<T>::setCoeffs(T2&& aCoeff, T2&& bCoeff)
 {
+    static_assert(std::is_same_v<T2, Eigen::VectorX<T>>, "The coefficents should be of type Eigen::VectorX<T>");
+
     if (!checkCoeffs(aCoeff, bCoeff))
         return false;
 
@@ -84,7 +91,7 @@ bool GenericFilter<T>::setCoeffs(const Eigen::VectorX<T>& aCoeff, const Eigen::V
 }
 
 template <typename T>
-void GenericFilter<T>::getCoeffs(Eigen::Ref<Eigen::VectorX<T>> aCoeff, Eigen::Ref<Eigen::VectorX<T>> bCoeff) const
+void GenericFilter<T>::getCoeffs(Eigen::VectorX<T>& aCoeff, Eigen::VectorX<T>& bCoeff) const
 {
     aCoeff = m_aCoeff;
     bCoeff = m_bCoeff;

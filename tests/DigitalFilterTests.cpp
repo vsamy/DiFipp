@@ -1,7 +1,6 @@
 #define BOOST_TEST_MODULE DigitalFilterTests
 
-#include "fratio.h"
-#include "typedefs.h"
+#include "fratio"
 #include "warning_macro.h"
 #include <boost/test/unit_test.hpp>
 
@@ -10,8 +9,8 @@ DISABLE_CONVERSION_WARNING_BEGIN
 template <typename T>
 struct System {
     Eigen::VectorX<T> data = (Eigen::VectorX<T>(4) << 1, 2, 3, 4).finished();
-    Eigen::VectorX<T> aCoeff = (Eigen::VectorX<T>(4) << 1, -0.99993717).finished();
-    Eigen::VectorX<T> bCoeff = (Eigen::VectorX<T>(4) << 0.99996859, -0.99996859).finished();
+    Eigen::VectorX<T> aCoeff = (Eigen::VectorX<T>(2) << 1, -0.99993717).finished();
+    Eigen::VectorX<T> bCoeff = (Eigen::VectorX<T>(2) << 0.99996859, -0.99996859).finished();
     Eigen::VectorX<T> results = (Eigen::VectorX<T>(4) << 0.99996859, 1.999874351973491, 2.999717289867956, 3.999497407630634).finished();
 };
 

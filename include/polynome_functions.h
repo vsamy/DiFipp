@@ -19,22 +19,22 @@ Eigen::VectorX<T> VietaAlgo<T>::polyCoeffFromRoot(const Eigen::VectorX<T>& poles
 {
     Eigen::VectorX<T> coeffs = Eigen::VectorX<T>::Zero(poles.size() + 1);
     coeffs(0) = T(1);
-    for (size_t i = 0; i < poles.size(); ++i) {
-        for (size_t k = i + 1; k > 0; --k) {
+    for (Eigen::Index i = 0; i < poles.size(); ++i) {
+        for (Eigen::Index k = i + 1; k > 0; --k) {
             coeffs(k) -= poles(i) * coeffs(k - 1);
         }
     }
     // Check for equation c(k) = sum(i=k-1, poles.size() : p(i)) * c(k-1), k>=1
-    // size_t pSize = poles.size();
-    // for (size_t k = 1; k < coeffs.size(); ++k)
+    // Eigen::Index pSize = poles.size();
+    // for (Eigen::Index k = 1; k < coeffs.size(); ++k)
     //     coeffs(k) -= poles.tail(pSize - (k - 1)).sum() * coeffs(k - 1);
 
     // Maybe better
     // T sum = poles.sum();
-    // for (size_t k = 1; k < coeffs.size(); ++k) {
+    // for (Eigen::Index k = 1; k < coeffs.size(); ++k) {
     //     coeffs(k) -= sum * coeffs(k - 1);
     //     sum -= poles(k - 1);
-    // } 
+    // }
 
     return coeffs;
 }

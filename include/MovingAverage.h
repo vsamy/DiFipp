@@ -9,13 +9,21 @@ template <typename T>
 class MovingAverage : public DigitalFilter<T> {
 public:
     MovingAverage() = default;
-    MovingAverage(size_t windowSize)
+    MovingAverage(int windowSize)
         : DigitalFilter<T>(Eigen::VectorX<T>::Constant(1, T(1)), Eigen::VectorX<T>::Constant(windowSize, T(1) / windowSize))
     {
     }
 
-    void setWindowSize(size_t windowSize) { setCoeffs(Eigen::VectorX<T>::Constant(1, T(1)), Eigen::VectorX<T>::Constant(windowSize, T(1) / windowSize)); }
-    size_t windowSize() const noexcept { return bOrder(); }
+    void setWindowSize(int windowSize)
+    {
+        if (windowSize <= 0) {
+            m_status = FilterStatus::BAD_ORDER_SIZE;
+            return;
+        }
+
+        setCoeffs(Eigen::VectorX<T>::Constant(1, T(1)), Eigen::VectorX<T>::Constant(windowSize, T(1) / windowSize));
+    }
+    int windowSize() const noexcept { return bOrder(); }
 };
 
 } // namespace fratio

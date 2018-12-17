@@ -1,6 +1,6 @@
 #define BOOST_TEST_MODULE MovingAverageFilterTests
 
-#include "fratio.h"
+#include "fratio"
 #include <boost/test/unit_test.hpp>
 
 template <typename T>
@@ -18,7 +18,7 @@ BOOST_FIXTURE_TEST_CASE(MOVING_AVERAGE_FLOAT, System<float>)
         filteredData.push_back(maf.stepFilter(data(i)));
 
     for (size_t i = 0; i < filteredData.size(); ++i)
-        BOOST_CHECK_SMALL(std::abs(filteredData[i] - results[i]), 1e-6f);
+        BOOST_CHECK_SMALL(std::abs(filteredData[i] - results(i)), 1e-6f);
 
     maf.resetFilter();
     Eigen::VectorXf fData = maf.filter(data);
