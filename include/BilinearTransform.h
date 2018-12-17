@@ -11,9 +11,9 @@ struct BilinearTransform {
     static_assert(std::is_floating_point<SubType>::value, "This struct can only accept floating point types (real and complex).");
 
     static void SToZ(SubType fs, const T& sPlanePole, T& zPlanePole);
-    static void SToZ(SubType fs, const Eigen::VectorX<T>& sPlanePoles, Eigen::Ref<Eigen::VectorX<T>>& zPlanePoles); // Can be optimized
+    static void SToZ(SubType fs, const vectX_t<T>& sPlanePoles, Eigen::Ref<vectX_t<T>>& zPlanePoles); // Can be optimized
     static void ZToS(SubType fs, const T& zPlanePole, T& sPlanePole);
-    static void ZToS(SubType fs, const Eigen::VectorX<T>& zPlanePoles, Eigen::Ref<Eigen::VectorX<T>>& sPlanePoles); // Can be optimized
+    static void ZToS(SubType fs, const vectX_t<T>& zPlanePoles, Eigen::Ref<vectX_t<T>>& sPlanePoles); // Can be optimized
 };
 
 template <typename T>
@@ -24,7 +24,7 @@ void BilinearTransform<T>::SToZ(SubType fs, const T& sPlanePole, T& zPlanePole)
 }
 
 template <typename T>
-void BilinearTransform<T>::SToZ(SubType fs, const Eigen::VectorX<T>& sPlanePoles, Eigen::Ref<Eigen::VectorX<T>>& zPlanePoles)
+void BilinearTransform<T>::SToZ(SubType fs, const vectX_t<T>& sPlanePoles, Eigen::Ref<vectX_t<T>>& zPlanePoles)
 {
     assert(sPlanePoles.size() == zPlanePoles.size());
     for (Eigen::Index k = 0; k < sPlanePoles.size(); ++k)
@@ -39,7 +39,7 @@ void BilinearTransform<T>::ZToS(SubType fs, const T& zPlanePole, T& sPlanePole)
 }
 
 template <typename T>
-void BilinearTransform<T>::ZToS(SubType fs, const Eigen::VectorX<T>& zPlanePoles, Eigen::Ref<Eigen::VectorX<T>>& sPlanePoles)
+void BilinearTransform<T>::ZToS(SubType fs, const vectX_t<T>& zPlanePoles, Eigen::Ref<vectX_t<T>>& sPlanePoles)
 {
     assert(zPlanePoles.size() == sPlanePoles.size());
     for (Eigen::Index k = 0; k < sPlanePoles.size(); ++k)

@@ -31,15 +31,15 @@ private:
     void initialize(int order, T fc, T fs);
     void computeDigitalRep();
     std::complex<T> generateAnalogPole(T fpw, int k);
-    Eigen::VectorX<std::complex<T>> generateAnalogZeros();
-    void scaleAmplitude(Eigen::Ref<Eigen::VectorX<T>> aCoeff, Eigen::Ref<Eigen::VectorX<T>> bCoeff);
+    vectX_t<std::complex<T>> generateAnalogZeros();
+    void scaleAmplitude(Eigen::Ref<vectX_t<T>> aCoeff, Eigen::Ref<vectX_t<T>> bCoeff);
 
 private:
     Type m_type;
     int m_order;
     T m_fc;
     T m_fs;
-    Eigen::VectorX<std::complex<T>> m_poles;
+    vectX_t<std::complex<T>> m_poles;
 };
 
 } // namespace fratio

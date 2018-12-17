@@ -2,14 +2,10 @@
 
 #include <Eigen/Core>
 
-namespace Eigen {
+namespace fratio {
 
 template <typename T>
-using VectorX = Eigen::Matrix<T, Eigen::Dynamic, 1>;
-
-} // namespace Eigen
-
-namespace fratio {
+using vectX_t = Eigen::Matrix<T, Eigen::Dynamic, 1>;
 
 enum class FilterStatus {
     // Generic filter

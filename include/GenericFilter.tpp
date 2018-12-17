@@ -17,7 +17,7 @@ std::string GenericFilter<T>::filterStatus(FilterStatus status)
         return "Filter has none of its coefficient initialized";
     case FilterStatus::A_COEFF_MISSING:
         return "Filter has its 'a' coefficients uninitialized";
-    case FilterStatus::A_COEFF_MISSING:
+    case FilterStatus::B_COEFF_MISSING:
         return "Filter has its 'b' coefficients uninitialized";
     case FilterStatus::BAD_FREQUENCY_VALUE:
         return "Filter has a received a frequency that is negative or equal to zero";
@@ -37,25 +37,26 @@ T GenericFilter<T>::stepFilter(const T& data)
 
     // Slide data (can't use SIMD, but should be small)
     m_rawData.tail(m_rawData.size() - 1) = m_rawData.head(m_rawData.size() - 1);
-    m_filteredData.tail(m_rawData.size() - 1) = m_filteredData.head(m_rawData.size() - 1);
+    m_filteredData.tail(m_filteredData.size() - 1) = m_filteredData.head(m_filteredData.size() - 1);
 
     m_rawData[0] = data;
+    m_filteredData[0] = 0;
     m_filteredData[0] = m_bCoeff.dot(m_rawData) - m_aCoeff.dot(m_filteredData);
     return m_filteredData[0];
 }
 
 template <typename T>
-Eigen::VectorX<T> GenericFilter<T>::filter(const Eigen::VectorX<T>& data)
+vectX_t<T> GenericFilter<T>::filter(const vectX_t<T>& data)
 {
-    Eigen::VectorX<T> results(data.size());
+    vectX_t<T> results(data.size());
     if (!getFilterResults(results, data))
-        return Eigen::VectorX<T>();
+        return vectX_t<T>();
 
     return results;
 }
 
 template <typename T>
-bool GenericFilter<T>::getFilterResults(Eigen::Ref<Eigen::VectorX<T>> results, const Eigen::VectorX<T>& data)
+bool GenericFilter<T>::getFilterResults(Eigen::Ref<vectX_t<T>> results, const vectX_t<T>& data)
 {
     assert(m_status == FilterStatus::READY);
     if (results.size() != data.size())
@@ -78,7 +79,7 @@ template <typename T>
 template <typename T2>
 bool GenericFilter<T>::setCoeffs(T2&& aCoeff, T2&& bCoeff)
 {
-    static_assert(std::is_same_v<T2, Eigen::VectorX<T>>, "The coefficents should be of type Eigen::VectorX<T>");
+    static_assert(std::is_same_v<T2, vectX_t<T>>, "The coefficents should be of type vectX_t<T>");
 
     if (!checkCoeffs(aCoeff, bCoeff))
         return false;
@@ -91,7 +92,7 @@ bool GenericFilter<T>::setCoeffs(T2&& aCoeff, T2&& bCoeff)
 }
 
 template <typename T>
-void GenericFilter<T>::getCoeffs(Eigen::VectorX<T>& aCoeff, Eigen::VectorX<T>& bCoeff) const
+void GenericFilter<T>::getCoeffs(vectX_t<T>& aCoeff, vectX_t<T>& bCoeff) const
 {
     aCoeff = m_aCoeff;
     bCoeff = m_bCoeff;
@@ -100,7 +101,7 @@ void GenericFilter<T>::getCoeffs(Eigen::VectorX<T>& aCoeff, Eigen::VectorX<T>& b
 // Protected functions
 
 template <typename T>
-GenericFilter<T>::GenericFilter(const Eigen::VectorX<T>& aCoeff, const Eigen::VectorX<T>& bCoeff)
+GenericFilter<T>::GenericFilter(const vectX_t<T>& aCoeff, const vectX_t<T>& bCoeff)
     : m_aCoeff(aCoeff)
     , m_bCoeff(bCoeff)
     , m_filteredData(aCoeff.size())
@@ -127,7 +128,7 @@ void GenericFilter<T>::normalizeCoeffs()
 }
 
 template <typename T>
-bool GenericFilter<T>::checkCoeffs(const Eigen::VectorX<T>& aCoeff, const Eigen::VectorX<T>& bCoeff)
+bool GenericFilter<T>::checkCoeffs(const vectX_t<T>& aCoeff, const vectX_t<T>& bCoeff)
 {
     m_status = FilterStatus::NONE;
     if (aCoeff.size() == 0)

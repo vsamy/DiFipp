@@ -11,30 +11,19 @@ struct VietaAlgo {
     static_assert(std::is_arithmetic<internal::complex_sub_type_t<T>>::value, "This struct can only accept arithmetic types or complex.");
 
     // Vieta's computation: https://en.wikipedia.org/wiki/Vieta%27s_formulas
-    static Eigen::VectorX<T> polyCoeffFromRoot(const Eigen::VectorX<T>& poles);
+    static vectX_t<T> polyCoeffFromRoot(const vectX_t<T>& poles);
 };
 
 template <typename T>
-Eigen::VectorX<T> VietaAlgo<T>::polyCoeffFromRoot(const Eigen::VectorX<T>& poles)
+vectX_t<T> VietaAlgo<T>::polyCoeffFromRoot(const vectX_t<T>& poles)
 {
-    Eigen::VectorX<T> coeffs = Eigen::VectorX<T>::Zero(poles.size() + 1);
+    vectX_t<T> coeffs = vectX_t<T>::Zero(poles.size() + 1);
     coeffs(0) = T(1);
     for (Eigen::Index i = 0; i < poles.size(); ++i) {
         for (Eigen::Index k = i + 1; k > 0; --k) {
             coeffs(k) -= poles(i) * coeffs(k - 1);
         }
     }
-    // Check for equation c(k) = sum(i=k-1, poles.size() : p(i)) * c(k-1), k>=1
-    // Eigen::Index pSize = poles.size();
-    // for (Eigen::Index k = 1; k < coeffs.size(); ++k)
-    //     coeffs(k) -= poles.tail(pSize - (k - 1)).sum() * coeffs(k - 1);
-
-    // Maybe better
-    // T sum = poles.sum();
-    // for (Eigen::Index k = 1; k < coeffs.size(); ++k) {
-    //     coeffs(k) -= sum * coeffs(k - 1);
-    //     sum -= poles(k - 1);
-    // }
 
     return coeffs;
 }

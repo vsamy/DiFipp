@@ -4,7 +4,7 @@
 #include <boost/test/unit_test.hpp>
 #include <vector>
 
-BOOST_AUTO_TEST_CASE(FilterThrows)
+BOOST_AUTO_TEST_CASE(FILTER_FAILURES)
 {
     auto dfd = fratio::DigitalFilterd(Eigen::VectorXd(), Eigen::VectorXd::Constant(2, 0));
     BOOST_REQUIRE(dfd.status() == fratio::FilterStatus::A_COEFF_MISSING);

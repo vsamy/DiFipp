@@ -17,34 +17,34 @@ public:
 public:
     // Careful: Only an assert check for the filter status
     T stepFilter(const T& data);
-    Eigen::VectorX<T> filter(const Eigen::VectorX<T>& data);
-    bool getFilterResults(Eigen::Ref<Eigen::VectorX<T>> results, const Eigen::VectorX<T>& data);
+    vectX_t<T> filter(const vectX_t<T>& data);
+    bool getFilterResults(Eigen::Ref<vectX_t<T>> results, const vectX_t<T>& data);
     void resetFilter();
 
     template <typename T2>
     bool setCoeffs(T2&& aCoeff, T2&& bCoeff);
 
-    void getCoeffs(Eigen::VectorX<T>& aCoeff, Eigen::VectorX<T>& bCoeff) const;
+    void getCoeffs(vectX_t<T>& aCoeff, vectX_t<T>& bCoeff) const;
     FilterStatus status() const noexcept { return m_status; }
     Eigen::Index aOrder() const noexcept { return m_aCoeff.size(); }
     Eigen::Index bOrder() const noexcept { return m_bCoeff.size(); }
 
 protected:
     GenericFilter() = default;
-    GenericFilter(const Eigen::VectorX<T>& aCoeff, const Eigen::VectorX<T>& bCoeff);
+    GenericFilter(const vectX_t<T>& aCoeff, const vectX_t<T>& bCoeff);
     virtual ~GenericFilter() = default;
 
     void normalizeCoeffs();
-    bool checkCoeffs(const Eigen::VectorX<T>& aCoeff, const Eigen::VectorX<T>& bCoeff);
+    bool checkCoeffs(const vectX_t<T>& aCoeff, const vectX_t<T>& bCoeff);
 
 protected:
     FilterStatus m_status;
 
 private:
-    Eigen::VectorX<T> m_aCoeff;
-    Eigen::VectorX<T> m_bCoeff;
-    Eigen::VectorX<T> m_filteredData;
-    Eigen::VectorX<T> m_rawData;
+    vectX_t<T> m_aCoeff;
+    vectX_t<T> m_bCoeff;
+    vectX_t<T> m_filteredData;
+    vectX_t<T> m_rawData;
 };
 
 } // namespace fratio

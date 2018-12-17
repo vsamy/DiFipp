@@ -10,7 +10,7 @@ class MovingAverage : public DigitalFilter<T> {
 public:
     MovingAverage() = default;
     MovingAverage(int windowSize)
-        : DigitalFilter<T>(Eigen::VectorX<T>::Constant(1, T(1)), Eigen::VectorX<T>::Constant(windowSize, T(1) / windowSize))
+        : DigitalFilter<T>(vectX_t<T>::Constant(1, T(1)), vectX_t<T>::Constant(windowSize, T(1) / windowSize))
     {
     }
 
@@ -21,7 +21,7 @@ public:
             return;
         }
 
-        setCoeffs(Eigen::VectorX<T>::Constant(1, T(1)), Eigen::VectorX<T>::Constant(windowSize, T(1) / windowSize));
+        setCoeffs(vectX_t<T>::Constant(1, T(1)), vectX_t<T>::Constant(windowSize, T(1) / windowSize));
     }
     int windowSize() const noexcept { return bOrder(); }
 };

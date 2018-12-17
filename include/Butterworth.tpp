@@ -55,17 +55,17 @@ void Butterworth<T>::computeDigitalRep()
 
     // Compute poles
     std::complex<T> analogPole;
-    Eigen::VectorX<std::complex<T>> poles(m_order);
+    vectX_t<std::complex<T>> poles(m_order);
     for (int k = 1; k <= m_order; ++k) {
         analogPole = generateAnalogPole(fpw, k);
         BilinearTransform<std::complex<T>>::SToZ(m_fs, analogPole, poles(k - 1));
     }
 
-    Eigen::VectorX<std::complex<T>> zeros = generateAnalogZeros();
-    Eigen::VectorX<std::complex<T>> a = VietaAlgo<std::complex<T>>::polyCoeffFromRoot(poles);
-    Eigen::VectorX<std::complex<T>> b = VietaAlgo<std::complex<T>>::polyCoeffFromRoot(zeros);
-    Eigen::VectorX<T> aCoeff(m_order + 1);
-    Eigen::VectorX<T> bCoeff(m_order + 1);
+    vectX_t<std::complex<T>> zeros = generateAnalogZeros();
+    vectX_t<std::complex<T>> a = VietaAlgo<std::complex<T>>::polyCoeffFromRoot(poles);
+    vectX_t<std::complex<T>> b = VietaAlgo<std::complex<T>>::polyCoeffFromRoot(zeros);
+    vectX_t<T> aCoeff(m_order + 1);
+    vectX_t<T> bCoeff(m_order + 1);
     for (int i = 0; i < m_order + 1; ++i) {
         aCoeff(i) = a(i).real();
         bCoeff(i) = b(i).real();
@@ -96,20 +96,20 @@ std::complex<T> Butterworth<T>::generateAnalogPole(T fpw, int k)
 }
 
 template <typename T>
-Eigen::VectorX<std::complex<T>> Butterworth<T>::generateAnalogZeros()
+vectX_t<std::complex<T>> Butterworth<T>::generateAnalogZeros()
 {
     switch (m_type) {
     case Type::HighPass:
-        return Eigen::VectorX<std::complex<T>>::Constant(m_order, std::complex<T>(1));
+        return vectX_t<std::complex<T>>::Constant(m_order, std::complex<T>(1));
 
     case Type::LowPass:
     default:
-        return Eigen::VectorX<std::complex<T>>::Constant(m_order, std::complex<T>(-1));
+        return vectX_t<std::complex<T>>::Constant(m_order, std::complex<T>(-1));
     }
 }
 
 template <typename T>
-void Butterworth<T>::scaleAmplitude(Eigen::Ref<Eigen::VectorX<T>> aCoeff, Eigen::Ref<Eigen::VectorX<T>> bCoeff)
+void Butterworth<T>::scaleAmplitude(Eigen::Ref<vectX_t<T>> aCoeff, Eigen::Ref<vectX_t<T>> bCoeff)
 {
     T scale = 0;
     T sumB = 0;
