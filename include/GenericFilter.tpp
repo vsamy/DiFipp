@@ -36,8 +36,10 @@ T GenericFilter<T>::stepFilter(const T& data)
     assert(m_status == FilterStatus::READY);
 
     // Slide data (can't use SIMD, but should be small)
-    m_rawData.tail(m_rawData.size() - 1) = m_rawData.head(m_rawData.size() - 1);
-    m_filteredData.tail(m_filteredData.size() - 1) = m_filteredData.head(m_filteredData.size() - 1);
+    for (Eigen::Index i = m_rawData.size() - 1; i > 0; --i)
+        m_rawData(i) = m_rawData(i - 1);
+    for (Eigen::Index i = m_filteredData.size() - 1; i > 0; --i)
+        m_filteredData(i) = m_filteredData(i - 1);
 
     m_rawData[0] = data;
     m_filteredData[0] = 0;

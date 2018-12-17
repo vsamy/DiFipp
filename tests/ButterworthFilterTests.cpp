@@ -1,6 +1,7 @@
 #define BOOST_TEST_MODULE ButterworthFilterTests
 
 #include "fratio"
+#include "test_functions.h"
 #include "warning_macro.h"
 #include <boost/test/unit_test.hpp>
 
@@ -12,87 +13,46 @@ struct System {
     int order = 5;
     T fc = 10;
     T fs = 100;
-    fratio::vectX_t<T> aCoeffRes = (fratio::vectX_t<T>(6) << 1.000000000000000, -2.975422109745684, 3.806018119320413, -2.545252868330468, 0.881130075437837, -0.125430622155356).finished();
-    fratio::vectX_t<T> bCoeffRes = (fratio::vectX_t<T>(6) << 0.001282581078961, 0.006412905394803, 0.012825810789607, 0.012825810789607, 0.006412905394803, 0.001282581078961).finished();
-    fratio::vectX_t<T> results = (fratio::vectX_t<T>(8) << 0.001282581078961, 0.012794287652606, 0.062686244350084, 0.203933712825708, 0.502244959135609, 1.010304217144175, 1.744652693589064, 2.678087381460197).finished();
+    // LP
+    fratio::vectX_t<T> lpACoeffRes = (fratio::vectX_t<T>(6) << 1, -2.975422109745684, 3.806018119320413, -2.545252868330468, 0.881130075437837, -0.125430622155356).finished();
+    fratio::vectX_t<T> lpBCoeffRes = (fratio::vectX_t<T>(6) << 0.001282581078961, 0.006412905394803, 0.012825810789607, 0.012825810789607, 0.006412905394803, 0.001282581078961).finished();
+    fratio::vectX_t<T> lpResults = (fratio::vectX_t<T>(8) << 0.001282581078961, 0.012794287652606, 0.062686244350084, 0.203933712825708, 0.502244959135609, 1.010304217144175, 1.744652693589064, 2.678087381460197).finished();
+    // HP
+    fratio::vectX_t<T> hpACoeffRes = (fratio::vectX_t<T>(6) << 1, -2.975422109745683, 3.806018119320411, -2.545252868330467, 0.8811300754378368, -0.1254306221553557).finished();
+    fratio::vectX_t<T> hpBCoeffRes = (fratio::vectX_t<T>(6) << 0.3541641810934298, -1.770820905467149, 3.541641810934299, -3.541641810934299, 1.770820905467149, -0.3541641810934298).finished();
+    fratio::vectX_t<T> hpResults = (fratio::vectX_t<T>(8) << 0.3541641810934298, -0.008704608374924483, -0.3113626313910076, -0.3460321436983160, -0.1787600153274098, 0.04471440201428267, 0.2059279258827846, 0.2533941579793959).finished();
 };
 
 DISABLE_CONVERSION_WARNING_END
 
-BOOST_FIXTURE_TEST_CASE(BUTTERWORTH_FILTER_FLOAT, System<float>)
+BOOST_FIXTURE_TEST_CASE(BUTTERWORTH_LP_FILTER_FLOAT, System<float>)
 {
     auto bf = fratio::Butterworthf(order, fc, fs);
-
-    std::vector<float> filteredData;
-    fratio::vectX_t<float> aCoeff, bCoeff;
-    bf.getCoeffs(aCoeff, bCoeff);
-
-    BOOST_REQUIRE_EQUAL(aCoeff.size(), aCoeffRes.size());
-    BOOST_REQUIRE_EQUAL(bCoeff.size(), bCoeffRes.size());
-    BOOST_REQUIRE_EQUAL(aCoeff.size(), bCoeffRes.size());
-
-    for (Eigen::Index i = 0; i < aCoeff.size(); ++i) {
-        BOOST_CHECK_SMALL(std::abs(aCoeff(i) - aCoeffRes(i)), 1e-6f);
-        BOOST_CHECK_SMALL(std::abs(bCoeff(i) - bCoeffRes(i)), 1e-6f);
-    }
-
-    for (Eigen::Index i = 0; i < data.size(); ++i)
-        filteredData.push_back(bf.stepFilter(data(i)));
-
-    for (size_t i = 0; i < filteredData.size(); ++i)
-        BOOST_CHECK_SMALL(std::abs(filteredData[i] - results(i)), 1e-6f);
-
-    bf.resetFilter();
-    Eigen::VectorXf fData = bf.filter(data);
-    for (Eigen::Index i = 0; i < fData.size(); ++i)
-        BOOST_CHECK_SMALL(std::abs(fData(i) - results(i)), 1e-6f);
-
-    auto bf2 = fratio::Butterworthf();
-
-    bf2.setFilterParameters(order, fc, fs);
-    filteredData.clear();
-    for (Eigen::Index i = 0; i < data.size(); ++i)
-        filteredData.push_back(bf2.stepFilter(data(i)));
-
-    for (size_t i = 0; i < filteredData.size(); ++i)
-        BOOST_CHECK_SMALL(std::abs(filteredData[i] - results(i)), 1e-6f);
+    BOOST_REQUIRE_EQUAL(bf.aOrder(), bf.bOrder());
+    test_coeffs(lpACoeffRes, lpBCoeffRes, bf);
+    test_results(lpResults, data, bf);
 }
 
-BOOST_FIXTURE_TEST_CASE(BUTTERWORTH_FILTER_DOUBLE, System<double>)
+BOOST_FIXTURE_TEST_CASE(BUTTERWORTH_LP_FILTER_DOUBLE, System<double>)
 {
     auto bf = fratio::Butterworthd(order, fc, fs);
+    BOOST_REQUIRE_EQUAL(bf.aOrder(), bf.bOrder());
+    test_coeffs(lpACoeffRes, lpBCoeffRes, bf);
+    test_results(lpResults, data, bf);
+}
 
-    std::vector<double> filteredData;
-    fratio::vectX_t<double> aCoeff, bCoeff;
-    bf.getCoeffs(aCoeff, bCoeff);
+BOOST_FIXTURE_TEST_CASE(BUTTERWORTH_HP_FILTER_FLOAT, System<float>)
+{
+    auto bf = fratio::Butterworthf(order, fc, fs, fratio::Butterworthf::Type::HighPass);
+    BOOST_REQUIRE_EQUAL(bf.aOrder(), bf.bOrder());
+    test_coeffs(hpACoeffRes, hpBCoeffRes, bf);
+    test_results(hpResults, data, bf);
+}
 
-    BOOST_REQUIRE_EQUAL(aCoeff.size(), aCoeffRes.size());
-    BOOST_REQUIRE_EQUAL(bCoeff.size(), bCoeffRes.size());
-    BOOST_REQUIRE_EQUAL(aCoeff.size(), bCoeffRes.size());
-
-    for (Eigen::Index i = 0; i < aCoeff.size(); ++i) {
-        BOOST_CHECK_SMALL(std::abs(aCoeff(i) - aCoeffRes(i)), 1e-14);
-        BOOST_CHECK_SMALL(std::abs(bCoeff(i) - bCoeffRes(i)), 1e-14);
-    }
-
-    for (Eigen::Index i = 0; i < data.size(); ++i)
-        filteredData.push_back(bf.stepFilter(data(i)));
-
-    for (size_t i = 0; i < filteredData.size(); ++i)
-        BOOST_CHECK_SMALL(std::abs(filteredData[i] - results(i)), 1e-14);
-
-    bf.resetFilter();
-    Eigen::VectorXd fData = bf.filter(data);
-    for (Eigen::Index i = 0; i < fData.size(); ++i)
-        BOOST_CHECK_SMALL(std::abs(fData(i) - results(i)), 1e-14);
-
-    auto bf2 = fratio::Butterworthd();
-
-    bf2.setFilterParameters(order, fc, fs);
-    filteredData.clear();
-    for (Eigen::Index i = 0; i < data.size(); ++i)
-        filteredData.push_back(bf2.stepFilter(data(i)));
-
-    for (size_t i = 0; i < filteredData.size(); ++i)
-        BOOST_CHECK_SMALL(std::abs(filteredData[i] - results(i)), 1e-14);
+BOOST_FIXTURE_TEST_CASE(BUTTERWORTH_HP_FILTER_DOUBLE, System<double>)
+{
+    auto bf = fratio::Butterworthd(order, fc, fs, fratio::Butterworthd::Type::HighPass);
+    BOOST_REQUIRE_EQUAL(bf.aOrder(), bf.bOrder());
+    test_coeffs(hpACoeffRes, hpBCoeffRes, bf);
+    test_results(hpResults, data, bf);
 }

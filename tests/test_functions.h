@@ -12,9 +12,9 @@ void test_coeffs(const fratio::vectX_t<T>& aCoeff, const fratio::vectX_t<T>& bCo
     fratio::vectX_t<T> faCoeff, fbCoeff;
     filter.getCoeffs(faCoeff, fbCoeff);
     for (Eigen::Index i = 0; i < faCoeff.size(); ++i)
-        BOOST_REQUIRE_SMALL(std::abs(aCoeff(i) - faCoeff(i)), std::numeric_limits<T>::epsilon() * 2);
+        BOOST_REQUIRE_SMALL(std::abs(aCoeff(i) - faCoeff(i)), std::numeric_limits<T>::epsilon() * 10);
     for (Eigen::Index i = 0; i < fbCoeff.size(); ++i)
-        BOOST_REQUIRE_SMALL(std::abs(bCoeff(i) - fbCoeff(i)), std::numeric_limits<T>::epsilon() * 2);
+        BOOST_REQUIRE_SMALL(std::abs(bCoeff(i) - fbCoeff(i)), std::numeric_limits<T>::epsilon() * 10);
 }
 
 template <typename T>
@@ -26,10 +26,10 @@ void test_results(const fratio::vectX_t<T>& results, const fratio::vectX_t<T>& d
         filteredData(i) = filter.stepFilter(data(i));
 
     for (Eigen::Index i = 0; i < filteredData.size(); ++i)
-        BOOST_REQUIRE_SMALL(std::abs(filteredData(i) - results(i)), std::numeric_limits<T>::epsilon() * 100);
+        BOOST_REQUIRE_SMALL(std::abs(filteredData(i) - results(i)), std::numeric_limits<T>::epsilon() * 1000);
 
     filter.resetFilter();
     filteredData = filter.filter(data);
     for (Eigen::Index i = 0; i < filteredData.size(); ++i)
-        BOOST_REQUIRE_SMALL(std::abs(filteredData(i) - results(i)), std::numeric_limits<T>::epsilon() * 100);
+        BOOST_REQUIRE_SMALL(std::abs(filteredData(i) - results(i)), std::numeric_limits<T>::epsilon() * 1000);
 }
