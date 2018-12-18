@@ -22,7 +22,7 @@ public:
     void resetFilter();
 
     template <typename T2>
-    bool setCoeffs(T2&& aCoeff, T2&& bCoeff);
+    void setCoeffs(T2&& aCoeff, T2&& bCoeff);
 
     void getCoeffs(vectX_t<T>& aCoeff, vectX_t<T>& bCoeff) const;
     FilterStatus status() const noexcept { return m_status; }

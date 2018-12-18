@@ -14,11 +14,11 @@ struct System {
 BOOST_FIXTURE_TEST_CASE(MOVING_AVERAGE_FLOAT, System<float>)
 {
     auto maf = fratio::MovingAveragef(windowSize);
-    test_results(results, data, maf);
+    test_results(results, data, maf, std::numeric_limits<float>::epsilon() * 10);
 }
 
 BOOST_FIXTURE_TEST_CASE(MOVING_AVERAGE_DOUBLE, System<double>)
 {
     auto maf = fratio::MovingAveraged(windowSize);
-    test_results(results, data, maf);
+    test_results(results, data, maf, std::numeric_limits<double>::epsilon() * 10);
 }

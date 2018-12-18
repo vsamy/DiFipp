@@ -23,6 +23,8 @@ std::string GenericFilter<T>::filterStatus(FilterStatus status)
         return "Filter has a received a frequency that is negative or equal to zero";
     case FilterStatus::BAD_CUTOFF_FREQUENCY:
         return "Filter has a received a bad cut-off frequency. It must be inferior to the sampling frequency";
+    case FilterStatus::BAD_BAND_FREQUENCY:
+        return "You try to initialize the filter with a bad combination of the frequency and bandwith, you must have fCenter > bw/2";
     default:
         return "I forgot to implement this error documentation";
     }
@@ -79,18 +81,17 @@ void GenericFilter<T>::resetFilter()
 
 template <typename T>
 template <typename T2>
-bool GenericFilter<T>::setCoeffs(T2&& aCoeff, T2&& bCoeff)
+void GenericFilter<T>::setCoeffs(T2&& aCoeff, T2&& bCoeff)
 {
-    static_assert(std::is_same_v<T2, vectX_t<T>>, "The coefficents should be of type vectX_t<T>");
+    static_assert(std::is_convertible_v<T2, vectX_t<T>>, "The coefficients types should be convertible to vectX_t<T>");
 
     if (!checkCoeffs(aCoeff, bCoeff))
-        return false;
+        return;
 
     m_aCoeff = aCoeff;
     m_bCoeff = bCoeff;
     resetFilter();
     normalizeCoeffs();
-    return true;
 }
 
 template <typename T>

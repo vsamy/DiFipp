@@ -10,8 +10,8 @@ class MovingAverage : public DigitalFilter<T> {
 public:
     MovingAverage() = default;
     MovingAverage(int windowSize)
-        : DigitalFilter<T>(vectX_t<T>::Constant(1, T(1)), vectX_t<T>::Constant(windowSize, T(1) / windowSize))
     {
+        setWindowSize(windowSize);
     }
 
     void setWindowSize(int windowSize)

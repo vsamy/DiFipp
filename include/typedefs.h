@@ -6,6 +6,8 @@ namespace fratio {
 
 template <typename T>
 using vectX_t = Eigen::Matrix<T, Eigen::Dynamic, 1>;
+template <typename T>
+using vectXc_t = vectX_t<std::complex<T>>;
 
 enum class FilterStatus {
     // Generic filter
@@ -19,7 +21,8 @@ enum class FilterStatus {
 
     // Butterworth filter
     BAD_FREQUENCY_VALUE,
-    BAD_CUTOFF_FREQUENCY
+    BAD_CUTOFF_FREQUENCY,
+    BAD_BAND_FREQUENCY
 };
 
 } // namespace fratio

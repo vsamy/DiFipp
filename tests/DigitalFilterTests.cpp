@@ -20,13 +20,13 @@ DISABLE_CONVERSION_WARNING_END
 BOOST_FIXTURE_TEST_CASE(DIGITAL_FILTER_FLOAT, System<float>)
 {
     auto df = fratio::DigitalFilterf(aCoeff, bCoeff);
-    test_coeffs(aCoeff, bCoeff, df);
-    test_results(results, data, df);
+    test_coeffs(aCoeff, bCoeff, df, std::numeric_limits<float>::epsilon() * 10);
+    test_results(results, data, df, std::numeric_limits<float>::epsilon() * 10);
 }
 
 BOOST_FIXTURE_TEST_CASE(DIGITAL_FILTER_DOUBLE, System<double>)
 {
     auto df = fratio::DigitalFilterd(aCoeff, bCoeff);
-    test_coeffs(aCoeff, bCoeff, df);
-    test_results(results, data, df);
+    test_coeffs(aCoeff, bCoeff, df, std::numeric_limits<double>::epsilon() * 10);
+    test_results(results, data, df, std::numeric_limits<double>::epsilon() * 10);
 }
