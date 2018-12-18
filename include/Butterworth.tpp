@@ -13,41 +13,47 @@ template <typename T>
 Butterworth<T>::Butterworth(int order, T fc, T fs, Type type)
     : m_type(type)
 {
-    initialize(order, fc, fs);
+    initialize(order, fc, 0, fs);
 }
 
 template <typename T>
-Butterworth<T>::Butterworth(int order, T fc, T fs, T fCenter, Type type)
+Butterworth<T>::Butterworth(int order, T fLower, T fUpper, T fs, Type type)
     : m_type(type)
 {
-    initialize(order, fc, fs, fCenter);
+    initialize(order, fLower, fUpper, fs);
 }
 
 template <typename T>
-void Butterworth<T>::setFilterParameters(int order, T fc, T fs, T fCenter)
+void Butterworth<T>::setFilterParameters(int order, T fc, T fs)
 {
-    initialize(order, fc, fs, fCenter);
+    initialize(order, fc, 0, fs);
 }
 
 template <typename T>
-void Butterworth<T>::initialize(int order, T fc, T fs, T fCenter)
+void Butterworth<T>::setFilterParameters(int order, T f0, T fLimit, T fs)
+{
+    initialize(order, f0, fLimit, fs);
+}
+
+template <typename T>
+void Butterworth<T>::initialize(int order, T f0, T fLimit, T fs)
 {
     if (order <= 0) {
         m_status = FilterStatus::BAD_ORDER_SIZE;
         return;
     }
 
-    if (fc <= 0 || fs <= 0) {
+    if (f0 <= 0 || fs <= 0) {
         m_status = FilterStatus::BAD_FREQUENCY_VALUE;
         return;
     }
 
-    if ((m_type == Type::BandPass || m_type == Type::BandReject) && fCenter - fc / 2. <= 0) {
+    if ((m_type == Type::BandPass || m_type == Type::BandReject) && f0 >= fLimit) {
         m_status = FilterStatus::BAD_BAND_FREQUENCY;
         return;
     }
 
-    if (m_fc > m_fs / 2.) {
+    if ((m_type == Type::LowPass || m_type == Type::HighPass) && f0 > fs / 2.) {
         m_status = FilterStatus::BAD_CUTOFF_FREQUENCY;
         return;
     }
@@ -55,9 +61,9 @@ void Butterworth<T>::initialize(int order, T fc, T fs, T fCenter)
     m_order = order;
     m_fs = fs;
     if (m_type == Type::LowPass || m_type == Type::HighPass)
-        computeDigitalRep(fc);
+        computeDigitalRep(f0);
     else
-        computeBandDigitalRep(fc, fCenter); // For band-like filters
+        computeBandDigitalRep(f0, fLimit); // For band-like filters
 
     resetFilter();
 }
@@ -65,9 +71,8 @@ void Butterworth<T>::initialize(int order, T fc, T fs, T fCenter)
 template <typename T>
 void Butterworth<T>::computeDigitalRep(T fc)
 {
-    m_fc = fc;
     // Continuous pre-warped frequency
-    T fpw = (m_fs / PI) * std::tan(PI * m_fc / m_fs);
+    T fpw = (m_fs / PI) * std::tan(PI * fc / m_fs);
 
     // Compute poles
     vectXc_t<T> poles(m_order);
@@ -92,24 +97,21 @@ void Butterworth<T>::computeDigitalRep(T fc)
 }
 
 template <typename T>
-void Butterworth<T>::computeBandDigitalRep(T bw, T fCenter)
+void Butterworth<T>::computeBandDigitalRep(T fLower, T fUpper)
 {
-    m_bw = bw;
-    m_fCenter = fCenter;
-    T f1 = m_fCenter - m_bw / T(2);
-    T f2 = m_fCenter + m_bw / T(2);
-    T fpw1 = (m_fs / PI) * std::tan(PI * f1 / m_fs);
-    T fpw2 = (m_fs / PI) * std::tan(PI * f2 / m_fs);
+    T fpw1 = (m_fs / PI) * std::tan(PI * fLower / m_fs);
+    T fpw2 = (m_fs / PI) * std::tan(PI * fUpper / m_fs);
+    T fpw0 = std::sqrt(fpw1 * fpw2);
 
     vectXc_t<T> poles(2 * m_order);
     std::pair<std::complex<T>, std::complex<T>> analogPoles;
     for (int k = 0; k < m_order; ++k) {
-        analogPoles = generateBandAnalogPole(k + 1, fpw1, fpw2);
+        analogPoles = generateBandAnalogPole(k + 1, fpw0, fpw2 - fpw1);
         BilinearTransform<std::complex<T>>::SToZ(m_fs, analogPoles.first, poles(2 * k));
         BilinearTransform<std::complex<T>>::SToZ(m_fs, analogPoles.second, poles(2 * k + 1));
     }
 
-    vectXc_t<T> zeros = generateAnalogZeros();
+    vectXc_t<T> zeros = generateAnalogZeros(fpw0);
     vectXc_t<T> a = VietaAlgo<std::complex<T>>::polyCoeffFromRoot(poles);
     vectXc_t<T> b = VietaAlgo<std::complex<T>>::polyCoeffFromRoot(zeros);
     vectX_t<T> aCoeff(2 * m_order + 1);
@@ -119,15 +121,11 @@ void Butterworth<T>::computeBandDigitalRep(T bw, T fCenter)
         bCoeff(i) = b(i).real();
     }
 
-    std::complex<T> s = std::exp(std::complex<T>(T(0), T(2) * PI * std::sqrt(f1 * f2) / m_fs));
-    std::complex<T> num(b(0));
-    std::complex<T> denum(a(0));
-    for (int i = 1; i < 2 * m_order + 1; ++i) {
-        num = num * s + b(i);
-        denum = denum * s + a(i);
-    }
-    std::complex<T> hf0 = num / denum;
-    bCoeff *= T(1) / std::abs(hf0); // bCoeff *= 1 / abs(num / denum)
+    if (m_type == Type::BandPass)
+        scaleAmplitude(aCoeff, bCoeff, std::exp(std::complex<T>(T(0), T(2) * PI * std::sqrt(fLower * fUpper) / m_fs)));
+    else
+        scaleAmplitude(aCoeff, bCoeff);
+
     setCoeffs(std::move(aCoeff), std::move(bCoeff));
 }
 
@@ -149,7 +147,7 @@ std::complex<T> Butterworth<T>::generateAnalogPole(int k, T fpw1)
 }
 
 template <typename T>
-std::pair<std::complex<T>, std::complex<T>> Butterworth<T>::generateBandAnalogPole(int k, T fpw1, T fpw2)
+std::pair<std::complex<T>, std::complex<T>> Butterworth<T>::generateBandAnalogPole(int k, T fpw0, T bw)
 {
     auto thetaK = [pi = PI, order = m_order](int k) -> T {
         return (2 * k - 1) * pi / (2 * order);
@@ -157,28 +155,35 @@ std::pair<std::complex<T>, std::complex<T>> Butterworth<T>::generateBandAnalogPo
 
     std::complex<T> analogPole(-std::sin(thetaK(k)), std::cos(thetaK(k)));
     std::pair<std::complex<T>, std::complex<T>> poles;
+    std::complex<T> s0 = T(2) * PI * fpw0;
+    std::complex<T> s = T(0.5) * bw / fpw0;
     switch (m_type) {
     case Type::BandReject:
+        s /= analogPole;
+        poles.first = s0 * (s + std::complex<T>(T(0), T(1)) * std::sqrt(T(1) - s * s));
+        poles.second = s0 * (s - std::complex<T>(T(0), T(1)) * std::sqrt(T(1) - s * s));
         return poles;
     case Type::BandPass:
-    default: {
-        std::complex<T> fpw0 = std::sqrt(fpw1 * fpw2);
-        std::complex<T> s = T(0.5) * (fpw2 - fpw1) * analogPole / fpw0;
-        poles.first = T(2) * PI * fpw0 * (s + std::complex<T>(T(0), T(1)) * std::sqrt(std::complex<T>(T(1), T(0)) - s * s));
-        poles.second = T(2) * PI * fpw0 * (s - std::complex<T>(T(0), T(1)) * std::sqrt(std::complex<T>(T(1), T(0)) - s * s));
+    default:
+        s *= analogPole;
+        poles.first = s0 * (s + std::complex<T>(T(0), T(1)) * std::sqrt(T(1) - s * s));
+        poles.second = s0 * (s - std::complex<T>(T(0), T(1)) * std::sqrt(T(1) - s * s));
         return poles;
-    }
     }
 }
 
 template <typename T>
-vectXc_t<T> Butterworth<T>::generateAnalogZeros()
+vectXc_t<T> Butterworth<T>::generateAnalogZeros(T fpw0)
 {
     switch (m_type) {
     case Type::HighPass:
         return vectXc_t<T>::Constant(m_order, std::complex<T>(1));
     case Type::BandPass:
         return (vectXc_t<T>(2 * m_order) << vectXc_t<T>::Constant(m_order, std::complex<T>(-1)), vectXc_t<T>::Constant(m_order, std::complex<T>(1))).finished();
+    case Type::BandReject: {
+        T w0 = T(2) * std::atan2(PI * fpw0, m_fs); // 2 * atan2(fpw0, 4)??
+        return (vectXc_t<T>(2 * m_order) << vectXc_t<T>::Constant(m_order, std::exp(std::complex<T>(0, fpw0))), vectXc_t<T>::Constant(m_order, std::exp(std::complex<T>(0, -fpw0)))).finished();
+    }
     case Type::LowPass:
     default:
         return vectXc_t<T>::Constant(m_order, std::complex<T>(-1));
@@ -186,7 +191,7 @@ vectXc_t<T> Butterworth<T>::generateAnalogZeros()
 }
 
 template <typename T>
-void Butterworth<T>::scaleAmplitude(Eigen::Ref<vectX_t<T>> aCoeff, Eigen::Ref<vectX_t<T>> bCoeff)
+void Butterworth<T>::scaleAmplitude(const vectX_t<T>& aCoeff, Eigen::Ref<vectX_t<T>> bCoeff, const std::complex<T>& bpS)
 {
     T num = 0;
     T denum = 0;
@@ -203,6 +208,17 @@ void Butterworth<T>::scaleAmplitude(Eigen::Ref<vectX_t<T>> aCoeff, Eigen::Ref<ve
             }
         }
         break;
+    case Type::BandPass: {
+        std::complex<T> numC(bCoeff(0));
+        std::complex<T> denumC(aCoeff(0));
+        for (int i = 1; i < 2 * m_order + 1; ++i) {
+            denumC = denumC * bpS + aCoeff(i);
+            numC = numC * bpS + bCoeff(i);
+        }
+        num = std::abs(denumC);
+        denum = std::abs(numC);
+    } break;
+    case Type::BandReject:
     case Type::LowPass:
     default:
         num = aCoeff.sum();

@@ -22,6 +22,6 @@ BOOST_AUTO_TEST_CASE(FILTER_FAILURES)
     BOOST_REQUIRE(mad.status() == fratio::FilterStatus::BAD_ORDER_SIZE);
     auto bfd = fratio::Butterworthd(0, 10, 100);
     BOOST_REQUIRE(bfd.status() == fratio::FilterStatus::BAD_ORDER_SIZE);
-    bfd = fratio::Butterworthd(5, 10, 100, 3);
+    bfd = fratio::Butterworthd(5, 5, 6, 100);
     BOOST_REQUIRE(bfd.status() == fratio::FilterStatus::BAD_BAND_FREQUENCY);
 }

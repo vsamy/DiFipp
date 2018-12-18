@@ -10,6 +10,7 @@ namespace fratio {
 // https://www.dsprelated.com/showarticle/1119.php
 // https://www.dsprelated.com/showarticle/1135.php
 // https://www.dsprelated.com/showarticle/1128.php
+// https://www.dsprelated.com/showarticle/1131.php
 template <typename T>
 class Butterworth : public DigitalFilter<T> {
 public:
@@ -28,26 +29,24 @@ public:
 public:
     Butterworth(Type type = Type::LowPass);
     Butterworth(int order, T fc, T fs, Type type = Type::LowPass);
-    Butterworth(int order, T bw, T fs, T fCenter, Type type = Type::BandPass);
+    Butterworth(int order, T fLower, T fUpper, T fs, Type type = Type::BandPass);
 
-    void setFilterParameters(int order, T fc, T fs, T fCenter = T(0));
+    void setFilterParameters(int order, T fc, T fs);
+    void setFilterParameters(int order, T f0, T fLimit, T fs);
 
 private:
-    void initialize(int order, T fc, T fs, T fCenter = T(0)); // fc = bw for bandPass filter
+    void initialize(int order, T f0, T fLimit, T fs); // f0 = fc for LowPass/HighPass filter
     void computeDigitalRep(T fc);
-    void computeBandDigitalRep(T bw, T fCenter);
+    void computeBandDigitalRep(T fLower, T fUpper);
     std::complex<T> generateAnalogPole(int k, T fpw);
-    std::pair<std::complex<T>, std::complex<T>> generateBandAnalogPole(int k, T fpw1, T fpw2);
-    vectXc_t<T> generateAnalogZeros();
-    void scaleAmplitude(Eigen::Ref<vectX_t<T>> aCoeff, Eigen::Ref<vectX_t<T>> bCoeff);
+    std::pair<std::complex<T>, std::complex<T>> generateBandAnalogPole(int k, T fpw0, T bw);
+    vectXc_t<T> generateAnalogZeros(T f0 = T());
+    void scaleAmplitude(const vectX_t<T>& aCoeff, Eigen::Ref<vectX_t<T>> bCoeff, const std::complex<T>& bpS = T());
 
 private:
     Type m_type;
     int m_order;
-    T m_fc;
-    T m_bw;
     T m_fs;
-    T m_fCenter;
     vectXc_t<T> m_poles;
 };
 

@@ -15,8 +15,10 @@ struct System {
     int order = 5;
     T fc = 10;
     T fs = 100;
-    T bw = 10;
-    T fCenter = 10;
+    T fLower = 5;
+    T fUpper = 15;
+    T f0 = 10;
+    T fU = 11;
     // LP
     fratio::vectX_t<T> lpACoeffRes = (fratio::vectX_t<T>(6) << 1, -2.975422109745684, 3.806018119320413, -2.545252868330468, 0.881130075437837, -0.125430622155356).finished();
     fratio::vectX_t<T> lpBCoeffRes = (fratio::vectX_t<T>(6) << 0.001282581078961, 0.006412905394803, 0.012825810789607, 0.012825810789607, 0.006412905394803, 0.001282581078961).finished();
@@ -29,6 +31,10 @@ struct System {
     fratio::vectX_t<T> bpACoeffRes = (fratio::vectX_t<T>(11) << 1, -6.784299264603903, 21.577693329895588, -42.338550072279737, 56.729081385507655, -54.208087151300411, 37.399203252161037, -18.397491390111661, 6.180883710485754, -1.283022311577260, 0.125430622155356).finished();
     fratio::vectX_t<T> bpBCoeffRes = (fratio::vectX_t<T>(11) << 0.001282581078963, 0, -0.006412905394817, 0, 0.012825810789633, 0, -0.012825810789633, 0, 0.006412905394817, 0, -0.001282581078963).finished();
     fratio::vectX_t<T> bpResults = (fratio::vectX_t<T>(8) << 0.001282581078963, 0.011266576028733, 0.046195520115810, 0.116904647483408, 0.200574194600111, 0.232153315136604, 0.141350142008155, -0.086403129422609).finished();
+    // BR
+    fratio::vectX_t<T> brACoeffRes = (fratio::vectX_t<T>(11) << 1.000000000000000, -6.784299264603897, 21.577693329895553, -42.338550072279631, 56.729081385507484, -54.208087151300205, 37.399203252160873, -18.397491390111572, 6.180883710485723, -1.283022311577253, 0.125430622155356).finished();
+    fratio::vectX_t<T> brBCoeffRes = (fratio::vectX_t<T>(11) << 0.354164181088899, -3.012700469326103, 12.021845263663774, -29.490886190815772, 49.130136704563000, -58.004276868015168, 49.130136704563000, -29.490886190815772, 12.021845263663774, -3.012700469326103, 0.354164181088899).finished();
+    fratio::vectX_t<T> brResults = (fratio::vectX_t<T>(8) << 0.354164181088899, 0.098383686162154, 0.084355149987331, 0.375555141082278, 0.735622022349639, 1.008089442365644, 1.229578363722674, 1.537000959441760).finished();
 };
 
 DISABLE_CONVERSION_WARNING_END
@@ -67,7 +73,7 @@ BOOST_FIXTURE_TEST_CASE(BUTTERWORTH_HP_FILTER_DOUBLE, System<double>)
 
 BOOST_FIXTURE_TEST_CASE(BUTTERWORTH_BP_FILTER_FLOAT, System<float>)
 {
-    auto bf = fratio::Butterworthf(order, bw, fs, fCenter);
+    auto bf = fratio::Butterworthf(order, fLower, fUpper, fs);
     BOOST_REQUIRE_EQUAL(bf.aOrder(), bf.bOrder());
     test_coeffs(bpACoeffRes, bpBCoeffRes, bf, std::numeric_limits<float>::epsilon() * 1000);
     test_results(bpResults, data, bf, std::numeric_limits<float>::epsilon() * 10000);
@@ -75,8 +81,24 @@ BOOST_FIXTURE_TEST_CASE(BUTTERWORTH_BP_FILTER_FLOAT, System<float>)
 
 BOOST_FIXTURE_TEST_CASE(BUTTERWORTH_BP_FILTER_DOUBLE, System<double>)
 {
-    auto bf = fratio::Butterworthd(order, bw, fs, fCenter);
+    auto bf = fratio::Butterworthd(order, fLower, fUpper, fs);
     BOOST_REQUIRE_EQUAL(bf.aOrder(), bf.bOrder());
     test_coeffs(bpACoeffRes, bpBCoeffRes, bf, std::numeric_limits<double>::epsilon() * 1000);
     test_results(bpResults, data, bf, std::numeric_limits<double>::epsilon() * 10000);
+}
+
+BOOST_FIXTURE_TEST_CASE(BUTTERWORTH_BR_FILTER_FLOAT, System<float>)
+{
+    auto bf = fratio::Butterworthf(order, fLower, fUpper, fs, fratio::Butterworthf::Type::BandReject);
+    BOOST_REQUIRE_EQUAL(bf.aOrder(), bf.bOrder());
+    test_coeffs(brACoeffRes, brBCoeffRes, bf, std::numeric_limits<float>::epsilon() * 10);
+    test_results(brResults, data, bf, std::numeric_limits<float>::epsilon() * 10);
+}
+
+BOOST_FIXTURE_TEST_CASE(BUTTERWORTH_BR_FILTER_DOUBLE, System<double>)
+{
+    auto bf = fratio::Butterworthd(order, fLower, fUpper, fs, fratio::Butterworthd::Type::BandReject);
+    BOOST_REQUIRE_EQUAL(bf.aOrder(), bf.bOrder());
+    test_coeffs(brACoeffRes, brBCoeffRes, bf, std::numeric_limits<double>::epsilon() * 10);
+    test_results(brResults, data, bf, std::numeric_limits<double>::epsilon() * 10);
 }
