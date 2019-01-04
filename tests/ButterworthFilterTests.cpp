@@ -17,8 +17,6 @@ struct System {
     T fs = 100;
     T fLower = 5;
     T fUpper = 15;
-    T f0 = 10;
-    T fU = 11;
     // LP
     fratio::vectX_t<T> lpACoeffRes = (fratio::vectX_t<T>(6) << 1, -2.975422109745684, 3.806018119320413, -2.545252868330468, 0.881130075437837, -0.125430622155356).finished();
     fratio::vectX_t<T> lpBCoeffRes = (fratio::vectX_t<T>(6) << 0.001282581078961, 0.006412905394803, 0.012825810789607, 0.012825810789607, 0.006412905394803, 0.001282581078961).finished();
@@ -91,14 +89,14 @@ BOOST_FIXTURE_TEST_CASE(BUTTERWORTH_BR_FILTER_FLOAT, System<float>)
 {
     auto bf = fratio::Butterworthf(order, fLower, fUpper, fs, fratio::Butterworthf::Type::BandReject);
     BOOST_REQUIRE_EQUAL(bf.aOrder(), bf.bOrder());
-    test_coeffs(brACoeffRes, brBCoeffRes, bf, std::numeric_limits<float>::epsilon() * 10);
-    test_results(brResults, data, bf, std::numeric_limits<float>::epsilon() * 10);
+    test_coeffs(brACoeffRes, brBCoeffRes, bf, 1.f);
+    test_results(brResults, data, bf, 1.f);
 }
 
 BOOST_FIXTURE_TEST_CASE(BUTTERWORTH_BR_FILTER_DOUBLE, System<double>)
 {
     auto bf = fratio::Butterworthd(order, fLower, fUpper, fs, fratio::Butterworthd::Type::BandReject);
     BOOST_REQUIRE_EQUAL(bf.aOrder(), bf.bOrder());
-    test_coeffs(brACoeffRes, brBCoeffRes, bf, std::numeric_limits<double>::epsilon() * 10);
-    test_results(brResults, data, bf, std::numeric_limits<double>::epsilon() * 10);
+    test_coeffs(brACoeffRes, brBCoeffRes, bf, 1e-8);
+    test_results(brResults, data, bf, 1e-8);
 }

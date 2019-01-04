@@ -107,8 +107,8 @@ void Butterworth<T>::computeBandDigitalRep(T fLower, T fUpper)
     std::pair<std::complex<T>, std::complex<T>> analogPoles;
     for (int k = 0; k < m_order; ++k) {
         analogPoles = generateBandAnalogPole(k + 1, fpw0, fpw2 - fpw1);
-        BilinearTransform<std::complex<T>>::SToZ(m_fs, analogPoles.first, poles(2 * k));
-        BilinearTransform<std::complex<T>>::SToZ(m_fs, analogPoles.second, poles(2 * k + 1));
+        BilinearTransform<std::complex<T>>::SToZ(m_fs, analogPoles.first, poles(k));
+        BilinearTransform<std::complex<T>>::SToZ(m_fs, analogPoles.second, poles(m_order + k));
     }
 
     vectXc_t<T> zeros = generateAnalogZeros(fpw0);
@@ -181,8 +181,8 @@ vectXc_t<T> Butterworth<T>::generateAnalogZeros(T fpw0)
     case Type::BandPass:
         return (vectXc_t<T>(2 * m_order) << vectXc_t<T>::Constant(m_order, std::complex<T>(-1)), vectXc_t<T>::Constant(m_order, std::complex<T>(1))).finished();
     case Type::BandReject: {
-        T w0 = T(2) * std::atan2(PI * fpw0, m_fs); // 2 * atan2(fpw0, 4)??
-        return (vectXc_t<T>(2 * m_order) << vectXc_t<T>::Constant(m_order, std::exp(std::complex<T>(0, fpw0))), vectXc_t<T>::Constant(m_order, std::exp(std::complex<T>(0, -fpw0)))).finished();
+        T w0 = T(2) * std::atan(PI * fpw0 / m_fs);
+        return (vectXc_t<T>(2 * m_order) << vectXc_t<T>::Constant(m_order, std::exp(std::complex<T>(0, w0))), vectXc_t<T>::Constant(m_order, std::exp(std::complex<T>(0, -w0)))).finished();
     }
     case Type::LowPass:
     default:
