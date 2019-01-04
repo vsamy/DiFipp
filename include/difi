@@ -23,35 +23,38 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#define BOOST_TEST_MODULE DigitalFilterTests
+#pragma once
 
-#include "difi"
-#include "test_functions.h"
-#include "warning_macro.h"
-#include <boost/test/unit_test.hpp>
+#include "BilinearTransform.h"
+#include "Butterworth.h"
+#include "DigitalFilter.h"
+#include "GenericFilter.h"
+#include "MovingAverage.h"
+#include "polynome_functions.h"
+#include "typedefs.h"
 
-DISABLE_CONVERSION_WARNING_BEGIN
+namespace difi {
 
-template <typename T>
-struct System {
-    difi::vectX_t<T> data = (difi::vectX_t<T>(4) << 1, 2, 3, 4).finished();
-    difi::vectX_t<T> aCoeff = (difi::vectX_t<T>(2) << 1, -0.99993717).finished();
-    difi::vectX_t<T> bCoeff = (difi::vectX_t<T>(2) << 0.99996859, -0.99996859).finished();
-    difi::vectX_t<T> results = (difi::vectX_t<T>(4) << 0.99996859, 1.999874351973491, 2.999717289867956, 3.999497407630634).finished();
-};
+// Filters
+using DigitalFilterf = DigitalFilter<float>;
+using DigitalFilterd = DigitalFilter<double>;
+using MovingAveragef = MovingAverage<float>;
+using MovingAveraged = MovingAverage<double>;
+using Butterworthf = Butterworth<float>;
+using Butterworthd = Butterworth<double>;
 
-DISABLE_CONVERSION_WARNING_END
+// Polynome helper functions
+using VietaAlgof = VietaAlgo<float>;
+using VietaAlgod = VietaAlgo<double>;
+using VietaAlgoi = VietaAlgo<int>;
+using VietaAlgocf = VietaAlgo<std::complex<float>>;
+using VietaAlgocd = VietaAlgo<std::complex<double>>;
+using VietaAlgoci = VietaAlgo<std::complex<int>>;
 
-BOOST_FIXTURE_TEST_CASE(DIGITAL_FILTER_FLOAT, System<float>)
-{
-    auto df = difi::DigitalFilterf(aCoeff, bCoeff);
-    test_coeffs(aCoeff, bCoeff, df, std::numeric_limits<float>::epsilon() * 10);
-    test_results(results, data, df, std::numeric_limits<float>::epsilon() * 10);
-}
+// Bilinear transformation functions
+using BilinearTransformf = BilinearTransform<float>;
+using BilinearTransformd = BilinearTransform<double>;
+using BilinearTransformcf = BilinearTransform<std::complex<float>>;
+using BilinearTransformcd = BilinearTransform<std::complex<double>>;
 
-BOOST_FIXTURE_TEST_CASE(DIGITAL_FILTER_DOUBLE, System<double>)
-{
-    auto df = difi::DigitalFilterd(aCoeff, bCoeff);
-    test_coeffs(aCoeff, bCoeff, df, std::numeric_limits<double>::epsilon() * 10);
-    test_results(results, data, df, std::numeric_limits<double>::epsilon() * 10);
-}
+} // namespace difi

@@ -1,15 +1,40 @@
+// Copyright (c) 2019, Vincent SAMY
+// All rights reserved.
+
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//     * Redistributions of source code must retain the above copyright
+//       notice, this list of conditions and the following disclaimer.
+//     * Redistributions in binary form must reproduce the above copyright
+//       notice, this list of conditions and the following disclaimer in the
+//       documentation and/or other materials provided with the distribution.
+//     * Neither the name of the AIST nor the
+//       names of its contributors may be used to endorse or promote products
+//       derived from this software without specific prior written permission.
+
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+// ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+// DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #pragma once
 
-#include "fratio"
+#include "difi"
 #include <boost/test/unit_test.hpp>
 #include <limits>
 
 template <typename T>
-void test_coeffs(const fratio::vectX_t<T>& aCoeff, const fratio::vectX_t<T>& bCoeff, const fratio::GenericFilter<T>& filter, T prec)
+void test_coeffs(const difi::vectX_t<T>& aCoeff, const difi::vectX_t<T>& bCoeff, const difi::GenericFilter<T>& filter, T prec)
 {
     BOOST_REQUIRE_EQUAL(aCoeff.size(), filter.aOrder());
     BOOST_REQUIRE_EQUAL(bCoeff.size(), filter.bOrder());
-    fratio::vectX_t<T> faCoeff, fbCoeff;
+    difi::vectX_t<T> faCoeff, fbCoeff;
     filter.getCoeffs(faCoeff, fbCoeff);
     for (Eigen::Index i = 0; i < faCoeff.size(); ++i)
         BOOST_REQUIRE_SMALL(std::abs(aCoeff(i) - faCoeff(i)), prec);
@@ -18,9 +43,9 @@ void test_coeffs(const fratio::vectX_t<T>& aCoeff, const fratio::vectX_t<T>& bCo
 }
 
 template <typename T>
-void test_results(const fratio::vectX_t<T>& results, const fratio::vectX_t<T>& data, fratio::GenericFilter<T>& filter, T prec)
+void test_results(const difi::vectX_t<T>& results, const difi::vectX_t<T>& data, difi::GenericFilter<T>& filter, T prec)
 {
-    fratio::vectX_t<T> filteredData(results.size());
+    difi::vectX_t<T> filteredData(results.size());
 
     for (Eigen::Index i = 0; i < data.size(); ++i)
         filteredData(i) = filter.stepFilter(data(i));

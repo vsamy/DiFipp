@@ -1,0 +1,35 @@
+DiFi++
+======
+
+[License BSD 3-Clause](https://tldrlegal.com/license/bsd-3-clause-license-(revised)#fulltext)
+
+DiFi++ is a small c++ header-only library  for **DI**gital **FI**lters based on rational transfer functions such as the butterworth filter and the moving average filter. DiFi++ is using the Eigen library for math computations.
+
+The implementation is based on well written article from Neil Robertson.
+Please check out the followings
+ * https://www.dsprelated.com/showarticle/1119.php
+ * https://www.dsprelated.com/showarticle/1135.php
+ * https://www.dsprelated.com/showarticle/1128.php
+ * https://www.dsprelated.com/showarticle/1131.php
+
+The library has been tested against Matlab results.
+
+A doxygen documentation is generated when compiling.
+
+Installing
+-----
+
+This is an header-only library so there is nothing to compile (but the documentation)
+
+```bash
+git clone --recursive https://github.com/vsamy/DiFi++
+cd DiFi++
+mkdir build
+cd build
+cmake ..
+make install
+```
+
+Note
+-----
+The method used is close but somewhat different from Matlab methods and Butterworth band-reject has quite different results (precision of 1e-8).
