@@ -4,6 +4,33 @@
 namespace fratio {
 
 template <typename T>
+T Butterworth<T>::PI = static_cast<T>(M_PI);
+
+template <typename T>
+std::pair<int, T> Butterworth<T>::findMinimumButter(T wPass, T wStop, T APass, T AStop)
+{
+    T num = std::log10((std::pow(T(10), T(0.1) * std::abs(AStop)) - 1) / (std::pow(T(10), T(0.1) * std::abs(APass)) - 1));
+    // pre-warp
+    T fwPass = std::tan(0.5 * PI * wPass);
+    T fwStop = std::tan(0.5 * PI * wStop);
+    T w;
+    if (wPass < wStop)
+        w = std::abs(fwStop / fwPass);
+    else
+        w = std::abs(fwPass / fwStop);
+    T denum = T(2) * std::log10(w);
+
+    int order = static_cast<int>(std::ceil(num / denum));
+    T ctf = w / std::pow(std::pow(T(10), T(0.1) * std::abs(AStop)) - 1, T(1) / T(2 * order));
+    if (wPass < wStop)
+        ctf *= fwPass;
+    else
+        ctf = fwPass / ctf;
+
+    return std::pair<int, T>(order, T(2) * std::atan(ctf) / PI);
+}
+
+template <typename T>
 Butterworth<T>::Butterworth(Type type)
     : m_type(type)
 {
@@ -30,30 +57,30 @@ void Butterworth<T>::setFilterParameters(int order, T fc, T fs)
 }
 
 template <typename T>
-void Butterworth<T>::setFilterParameters(int order, T f0, T fLimit, T fs)
+void Butterworth<T>::setFilterParameters(int order, T fLower, T fUpper, T fs)
 {
-    initialize(order, f0, fLimit, fs);
+    initialize(order, fLower, fUpper, fs);
 }
 
 template <typename T>
-void Butterworth<T>::initialize(int order, T f0, T fLimit, T fs)
+void Butterworth<T>::initialize(int order, T f1, T f2, T fs)
 {
     if (order <= 0) {
         m_status = FilterStatus::BAD_ORDER_SIZE;
         return;
     }
 
-    if (f0 <= 0 || fs <= 0) {
+    if (f1 <= 0 || fs <= 0) {
         m_status = FilterStatus::BAD_FREQUENCY_VALUE;
         return;
     }
 
-    if ((m_type == Type::BandPass || m_type == Type::BandReject) && f0 >= fLimit) {
+    if ((m_type == Type::BandPass || m_type == Type::BandReject) && f1 >= f2) {
         m_status = FilterStatus::BAD_BAND_FREQUENCY;
         return;
     }
 
-    if ((m_type == Type::LowPass || m_type == Type::HighPass) && f0 > fs / 2.) {
+    if ((m_type == Type::LowPass || m_type == Type::HighPass) && f1 > fs / 2.) {
         m_status = FilterStatus::BAD_CUTOFF_FREQUENCY;
         return;
     }
@@ -61,9 +88,9 @@ void Butterworth<T>::initialize(int order, T f0, T fLimit, T fs)
     m_order = order;
     m_fs = fs;
     if (m_type == Type::LowPass || m_type == Type::HighPass)
-        computeDigitalRep(f0);
+        computeDigitalRep(f1);
     else
-        computeBandDigitalRep(f0, fLimit); // For band-like filters
+        computeBandDigitalRep(f1, f2); // For band-like filters
 
     resetFilter();
 }

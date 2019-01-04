@@ -37,6 +37,32 @@ struct System {
 
 DISABLE_CONVERSION_WARNING_END
 
+BOOST_AUTO_TEST_CASE(FIND_BUTTERWORTH_LP_HP_FLOAT)
+{
+    // LP
+    auto butterRequirement = fratio::Butterworthf::findMinimumButter(40.f / 500.f, 150.f / 500.f, 3.f, 60.f);
+    BOOST_REQUIRE_EQUAL(5, butterRequirement.first);
+    BOOST_REQUIRE_SMALL(std::abs(static_cast<float>(0.081038494957764) - butterRequirement.second), std::numeric_limits<float>::epsilon() * 10);
+
+    // HP
+    butterRequirement = fratio::Butterworthf::findMinimumButter(150.f / 500.f, 40.f / 500.f, 3.f, 60.f);
+    BOOST_REQUIRE_EQUAL(5, butterRequirement.first);
+    BOOST_REQUIRE_SMALL(std::abs(static_cast<float>(0.296655824107340) - butterRequirement.second), std::numeric_limits<float>::epsilon() * 10);
+}
+
+BOOST_AUTO_TEST_CASE(FIND_BUTTERWORTH_LP_HP_DOUBLE)
+{
+    // LP
+    auto butterRequirement = fratio::Butterworthd::findMinimumButter(40. / 500., 150. / 500., 3., 60.);
+    BOOST_REQUIRE_EQUAL(5, butterRequirement.first);
+    BOOST_REQUIRE_SMALL(std::abs(0.081038494957764 - butterRequirement.second), std::numeric_limits<double>::epsilon() * 10);
+
+    // HP
+    butterRequirement = fratio::Butterworthd::findMinimumButter(150. / 500., 40. / 500., 3., 60.);
+    BOOST_REQUIRE_EQUAL(5, butterRequirement.first);
+    BOOST_REQUIRE_SMALL(std::abs(0.296655824107340 - butterRequirement.second), std::numeric_limits<double>::epsilon() * 10);
+}
+
 BOOST_FIXTURE_TEST_CASE(BUTTERWORTH_LP_FILTER_FLOAT, System<float>)
 {
     auto bf = fratio::Butterworthf(order, fc, fs);

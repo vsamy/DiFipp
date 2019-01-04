@@ -11,10 +11,11 @@ namespace fratio {
 // https://www.dsprelated.com/showarticle/1135.php
 // https://www.dsprelated.com/showarticle/1128.php
 // https://www.dsprelated.com/showarticle/1131.php
+// https://www.mathworks.com/help/signal/ref/butter.html
 template <typename T>
 class Butterworth : public DigitalFilter<T> {
 public:
-    T PI = static_cast<T>(M_PI);
+    static T PI;
 
 public:
     enum class Type {
@@ -24,18 +25,21 @@ public:
         BandReject
     };
 
-    // public:
-    //     static double minimumRequiredFrequency(...);
+public:
+    // http://www.matheonics.com/Tutorials/Butterworth.html#Paragraph_3.2
+    // https://www.mathworks.com/help/signal/ref/buttord.html#d120e11079
+    static std::pair<int, T> findMinimumButter(T wPass, T wStop, T APass, T AStop); // Only for low and high pass
+
 public:
     Butterworth(Type type = Type::LowPass);
     Butterworth(int order, T fc, T fs, Type type = Type::LowPass);
     Butterworth(int order, T fLower, T fUpper, T fs, Type type = Type::BandPass);
 
     void setFilterParameters(int order, T fc, T fs);
-    void setFilterParameters(int order, T f0, T fLimit, T fs);
+    void setFilterParameters(int order, T fLower, T fUpper, T fs);
 
 private:
-    void initialize(int order, T f0, T fLimit, T fs); // f0 = fc for LowPass/HighPass filter
+    void initialize(int order, T f1, T f2, T fs); // f1 = fc for LowPass/HighPass filter
     void computeDigitalRep(T fc);
     void computeBandDigitalRep(T fLower, T fUpper);
     std::complex<T> generateAnalogPole(int k, T fpw);
