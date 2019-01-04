@@ -5,11 +5,20 @@
 
 namespace fratio {
 
-// https://www.mathworks.com/help/dsp/ug/how-is-moving-average-filter-different-from-an-fir-filter.html
+/*! \brief Basic digital filter.
+ * 
+ * This filter allows you to set any digital filter based on its coefficients.
+ * \tparam T Floating type.
+ */
 template <typename T>
 class DigitalFilter : public GenericFilter<T> {
 public:
+    /*! \brief Default uninitialized constructor. */
     DigitalFilter() = default;
+    /*! \brief Constructor.
+     * \param aCoeff Denominator coefficients of the filter in decreasing order.
+     * \param bCoeff Numerator coefficients of the filter in decreasing order.
+     */
     DigitalFilter(const vectX_t<T>& aCoeff, const vectX_t<T>& bCoeff)
         : GenericFilter<T>(aCoeff, bCoeff)
     {

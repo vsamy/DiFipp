@@ -11,8 +11,8 @@ std::pair<int, T> Butterworth<T>::findMinimumButter(T wPass, T wStop, T APass, T
 {
     T num = std::log10((std::pow(T(10), T(0.1) * std::abs(AStop)) - 1) / (std::pow(T(10), T(0.1) * std::abs(APass)) - 1));
     // pre-warp
-    T fwPass = std::tan(0.5 * PI * wPass);
-    T fwStop = std::tan(0.5 * PI * wStop);
+    T fwPass = std::tan(T(0.5) * PI * wPass);
+    T fwStop = std::tan(T(0.5) * PI * wStop);
     T w;
     if (wPass < wStop)
         w = std::abs(fwStop / fwPass);
@@ -65,6 +65,8 @@ void Butterworth<T>::setFilterParameters(int order, T fLower, T fUpper, T fs)
 template <typename T>
 void Butterworth<T>::initialize(int order, T f1, T f2, T fs)
 {
+    // f1 = fc for LowPass/HighPass filter
+    // f1 = fLower, f2 = fUpper for BandPass/BandReject filter
     if (order <= 0) {
         m_status = FilterStatus::BAD_ORDER_SIZE;
         return;

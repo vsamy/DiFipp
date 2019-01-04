@@ -7,44 +7,104 @@
 
 namespace fratio {
 
+/*! \brief Low-level filter.
+ * 
+ * It creates the basic and common functions of all linear filter that can written as a digital filter.
+ * This class can not be instantiated directly.
+ * 
+ * \warning In Debug mode, all functions may throw if a filter is badly initialized.
+ * This not the case in Realese mode.
+ * 
+ * \tparam T Floating type.
+ */
 template <typename T>
 class GenericFilter {
     static_assert(std::is_floating_point<T>::value && !std::is_const<T>::value, "Only accept non-complex floating point types.");
 
 public:
+    /*! \brief Get the meaning of the filter status.
+     * \param status Filter status to get the meaning from.
+     * \return The meaning.
+     */
     static std::string filterStatus(FilterStatus status);
 
 public:
-    // Careful: Only an assert check for the filter status
+    /*! \brief Filter a new data.
+     * 
+     * This function is practical for online application that does not know the whole signal in advance.
+     * \param data New data to filter.
+     * \return Filtered data.
+     */
     T stepFilter(const T& data);
+    /*! \brief Filter a signal.
+     * 
+     * Filter all data given by the signal.
+     * \param data Signal.
+     * \return Filtered signal.
+     */
     vectX_t<T> filter(const vectX_t<T>& data);
+    /*! \brief Filter a signal and store in a user-defined Eigen vector.
+     * 
+     * Useful if the length of the signal is known in advance.
+     * \param[out] results Filtered signal.
+     * \param data Signal.
+     * \return False if vector's lengths do not match.
+     */
     bool getFilterResults(Eigen::Ref<vectX_t<T>> results, const vectX_t<T>& data);
+    /*! \brief Reset the data and filtered data. */
     void resetFilter();
-
-    template <typename T2>
-    void setCoeffs(T2&& aCoeff, T2&& bCoeff);
-
+    /*! \brief Get digital filter coefficients.
+     * 
+     * It will automatically resize the given vectors.
+     * \param[out] aCoeff Denominator coefficients of the filter in decreasing order.
+     * \param[out] bCoeff Numerator coefficients of the filter in decreasing order.
+     */
     void getCoeffs(vectX_t<T>& aCoeff, vectX_t<T>& bCoeff) const;
+    /*! \brief Return the current filter status. */
     FilterStatus status() const noexcept { return m_status; }
+    /*! \brief Return the order the denominator polynome order of the filter. */
     Eigen::Index aOrder() const noexcept { return m_aCoeff.size(); }
+    /*! \brief Return the order the numerator polynome order of the filter. */
     Eigen::Index bOrder() const noexcept { return m_bCoeff.size(); }
 
 protected:
+    /*! \brief Default uninitialized constructor. */
     GenericFilter() = default;
+    /*! \brief Constructor.
+     * \param aCoeff Denominator coefficients of the filter in decreasing order.
+     * \param bCoeff Numerator coefficients of the filter in decreasing order.
+     */
     GenericFilter(const vectX_t<T>& aCoeff, const vectX_t<T>& bCoeff);
+    /*! \brief Default destructor. */
     virtual ~GenericFilter() = default;
 
+    /*! \brief Set the new coefficients of the filters.
+     *
+     * It awaits a universal reference.
+     * \param aCoeff Denominator coefficients of the filter in decreasing order.
+     * \param bCoeff Numerator coefficients of the filter in decreasing order.
+     */
+    template <typename T2>
+    void setCoeffs(T2&& aCoeff, T2&& bCoeff);
+    /*! \brief Normalized the filter coefficients such that aCoeff(0) = 1. */
     void normalizeCoeffs();
+    /*! \brief Check for bad coefficients.
+     * 
+     * Set the filter status to ready is everything is fine.
+     * \param aCoeff Denominator coefficients of the filter.
+     * \param bCoeff Numerator coefficients of the filter.
+     * \return True if the filter status is set on READY.
+     */
     bool checkCoeffs(const vectX_t<T>& aCoeff, const vectX_t<T>& bCoeff);
 
 protected:
-    FilterStatus m_status;
+    FilterStatus m_status; /*!< Filter status */
 
 private:
-    vectX_t<T> m_aCoeff;
-    vectX_t<T> m_bCoeff;
-    vectX_t<T> m_filteredData;
-    vectX_t<T> m_rawData;
+    vectX_t<T> m_aCoeff; /*!< Denominator coefficients of the filter */
+    vectX_t<T> m_bCoeff; /*!< Numerator coefficients of the filter */
+    vectX_t<T> m_filteredData; /*!< Last set of filtered data */
+    vectX_t<T> m_rawData; /*!< Last set of non-filtered data */
 };
 
 } // namespace fratio
