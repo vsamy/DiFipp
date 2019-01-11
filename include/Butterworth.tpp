@@ -34,6 +34,8 @@ T Butterworth<T>::PI = static_cast<T>(M_PI);
 template <typename T>
 std::pair<int, T> Butterworth<T>::findMinimumButter(T wPass, T wStop, T APass, T AStop)
 {
+    Expects(wPass > T(0) && wPass < T(1));
+    Expects(wStop > T(0) && wPass < T(1));
     T num = std::log10((std::pow(T(10), T(0.1) * std::abs(AStop)) - 1) / (std::pow(T(10), T(0.1) * std::abs(APass)) - 1));
     // pre-warp
     T fwPass = std::tan(T(0.5) * PI * wPass);
@@ -65,25 +67,27 @@ template <typename T>
 Butterworth<T>::Butterworth(int order, T fc, T fs, Type type)
     : m_type(type)
 {
-    initialize(order, fc, 0, fs);
+    setFilterParameters(order, fc, fs);
 }
 
 template <typename T>
 Butterworth<T>::Butterworth(int order, T fLower, T fUpper, T fs, Type type)
     : m_type(type)
 {
-    initialize(order, fLower, fUpper, fs);
+    setFilterParameters(order, fLower, fUpper, fs);
 }
 
 template <typename T>
 void Butterworth<T>::setFilterParameters(int order, T fc, T fs)
 {
+    Expects(fc < fs / T(2));
     initialize(order, fc, 0, fs);
 }
 
 template <typename T>
 void Butterworth<T>::setFilterParameters(int order, T fLower, T fUpper, T fs)
 {
+    Expects(fLower < fUpper);
     initialize(order, fLower, fUpper, fs);
 }
 
@@ -92,25 +96,8 @@ void Butterworth<T>::initialize(int order, T f1, T f2, T fs)
 {
     // f1 = fc for LowPass/HighPass filter
     // f1 = fLower, f2 = fUpper for BandPass/BandReject filter
-    if (order <= 0) {
-        m_status = FilterStatus::BAD_ORDER_SIZE;
-        return;
-    }
-
-    if (f1 <= 0 || fs <= 0) {
-        m_status = FilterStatus::BAD_FREQUENCY_VALUE;
-        return;
-    }
-
-    if ((m_type == Type::BandPass || m_type == Type::BandReject) && f1 >= f2) {
-        m_status = FilterStatus::BAD_BAND_FREQUENCY;
-        return;
-    }
-
-    if ((m_type == Type::LowPass || m_type == Type::HighPass) && f1 > fs / 2.) {
-        m_status = FilterStatus::BAD_CUTOFF_FREQUENCY;
-        return;
-    }
+    Expects(order > 0);
+    Expects(f1 > 0 && fs > 0); // f2 must be > f1 check in setFilterParameters
 
     m_order = order;
     m_fs = fs;
@@ -118,8 +105,6 @@ void Butterworth<T>::initialize(int order, T f1, T f2, T fs)
         computeDigitalRep(f1);
     else
         computeBandDigitalRep(f1, f2); // For band-like filters
-
-    resetFilter();
 }
 
 template <typename T>
@@ -195,8 +180,9 @@ std::complex<T> Butterworth<T>::generateAnalogPole(int k, T fpw1)
     case Type::HighPass:
         return T(2) * PI * fpw1 / analogPole;
     case Type::LowPass:
-    default:
         return T(2) * PI * fpw1 * analogPole;
+    default:
+        GSL_ASSUME(0);
     }
 }
 
@@ -218,11 +204,12 @@ std::pair<std::complex<T>, std::complex<T>> Butterworth<T>::generateBandAnalogPo
         poles.second = s0 * (s - std::complex<T>(T(0), T(1)) * std::sqrt(T(1) - s * s));
         return poles;
     case Type::BandPass:
-    default:
         s *= analogPole;
         poles.first = s0 * (s + std::complex<T>(T(0), T(1)) * std::sqrt(T(1) - s * s));
         poles.second = s0 * (s - std::complex<T>(T(0), T(1)) * std::sqrt(T(1) - s * s));
         return poles;
+    default:
+        GSL_ASSUME(0);
     }
 }
 

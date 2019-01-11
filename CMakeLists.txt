@@ -44,6 +44,18 @@ set(CMAKE_CXX_STANDARD 14)
 setup_project()
 
 option(DISABLE_TESTS "Disable unit tests." OFF)
+option(THROW_ON_CONTRACT_VIOLATION "Throw an error when program fails." ON)
+option(TERMINATE_ON_CONTRACT_VIOLATION "Terminate program when an error occurs. (Default)" OFF)
+option(UNENFORCED_ON_CONTRACT_VIOLATION "Do not perform any check." OFF)
+
+# Handle contracts specifications
+if(${THROW_ON_CONTRACT_VIOLATION})
+    add_compile_options(-DGSL_THROW_ON_CONTRACT_VIOLATION)
+elseif(${TERMINATE_ON_CONTRACT_VIOLATION})
+    add_compile_options(-DGSL_TERMINATE_ON_CONTRACT_VIOLATION)
+elseif()
+    add_compile_options(-DGSL_UNENFORCED_ON_CONTRACT_VIOLATION)
+endif()
 
 # for MSVC
 if(MSVC)

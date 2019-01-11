@@ -27,40 +27,12 @@
 
 namespace difi {
 
-// Public static functions
-template <typename T>
-std::string GenericFilter<T>::filterStatus(FilterStatus status)
-{
-    switch (status) {
-    case FilterStatus::NONE:
-        return "Filter is uninitialized";
-    case FilterStatus::READY:
-        return "Filter is ready to be used";
-    case FilterStatus::BAD_ORDER_SIZE:
-        return "You try to initialize the filter with an order inferior or equal to 0 (window size for the moving average)";
-    case FilterStatus::ALL_COEFF_MISSING:
-        return "Filter has none of its coefficient initialized";
-    case FilterStatus::A_COEFF_MISSING:
-        return "Filter has its 'a' coefficients uninitialized";
-    case FilterStatus::B_COEFF_MISSING:
-        return "Filter has its 'b' coefficients uninitialized";
-    case FilterStatus::BAD_FREQUENCY_VALUE:
-        return "Filter has a received a frequency that is negative or equal to zero";
-    case FilterStatus::BAD_CUTOFF_FREQUENCY:
-        return "Filter has a received a bad cut-off frequency. It must be inferior to the sampling frequency";
-    case FilterStatus::BAD_BAND_FREQUENCY:
-        return "You try to initialize the filter with a bad combination of the frequency and bandwith, you must have fCenter > bw/2";
-    default:
-        return "I forgot to implement this error documentation";
-    }
-}
-
 // Public functions
 
 template <typename T>
 T GenericFilter<T>::stepFilter(const T& data)
 {
-    assert(m_status == FilterStatus::READY);
+    Expects(m_isInitialized);
 
     // Slide data (can't use SIMD, but should be small)
     for (Eigen::Index i = m_rawData.size() - 1; i > 0; --i)
@@ -78,27 +50,21 @@ template <typename T>
 vectX_t<T> GenericFilter<T>::filter(const vectX_t<T>& data)
 {
     vectX_t<T> results(data.size());
-    if (!getFilterResults(results, data))
-        return vectX_t<T>();
-
+    getFilterResults(results, data);
     return results;
 }
 
 template <typename T>
-bool GenericFilter<T>::getFilterResults(Eigen::Ref<vectX_t<T>> results, const vectX_t<T>& data)
+void GenericFilter<T>::getFilterResults(Eigen::Ref<vectX_t<T>> results, const vectX_t<T>& data)
 {
-    assert(m_status == FilterStatus::READY);
-    if (results.size() != data.size())
-        return false;
-
+    Expects(m_isInitialized);
+    Expects(results.size() == data.size());
     for (Eigen::Index i = 0; i < data.size(); ++i)
         results(i) = stepFilter(data(i));
-
-    return true;
 }
 
 template <typename T>
-void GenericFilter<T>::resetFilter()
+void GenericFilter<T>::resetFilter() noexcept
 {
     m_filteredData.setZero(m_aCoeff.size());
     m_rawData.setZero(m_bCoeff.size());
@@ -110,17 +76,16 @@ void GenericFilter<T>::setCoeffs(T2&& aCoeff, T2&& bCoeff)
 {
     static_assert(std::is_convertible_v<T2, vectX_t<T>>, "The coefficients types should be convertible to vectX_t<T>");
 
-    if (!checkCoeffs(aCoeff, bCoeff))
-        return;
-
+    checkCoeffs(aCoeff, bCoeff);
     m_aCoeff = aCoeff;
     m_bCoeff = bCoeff;
-    resetFilter();
     normalizeCoeffs();
+    resetFilter();
+    m_isInitialized = true;
 }
 
 template <typename T>
-void GenericFilter<T>::getCoeffs(vectX_t<T>& aCoeff, vectX_t<T>& bCoeff) const
+void GenericFilter<T>::getCoeffs(vectX_t<T>& aCoeff, vectX_t<T>& bCoeff) const noexcept
 {
     aCoeff = m_aCoeff;
     bCoeff = m_bCoeff;
@@ -135,18 +100,15 @@ GenericFilter<T>::GenericFilter(const vectX_t<T>& aCoeff, const vectX_t<T>& bCoe
     , m_filteredData(aCoeff.size())
     , m_rawData(bCoeff.size())
 {
-    if (!checkCoeffs(aCoeff, bCoeff))
-        return;
-
-    resetFilter();
+    checkCoeffs(aCoeff, bCoeff);
     normalizeCoeffs();
+    resetFilter();
+    m_isInitialized = true;
 }
 
 template <typename T>
 void GenericFilter<T>::normalizeCoeffs()
 {
-    assert(m_status == FilterStatus::READY);
-
     T a0 = m_aCoeff(0);
     if (std::abs(a0 - T(1)) < std::numeric_limits<T>::epsilon())
         return;
@@ -156,21 +118,11 @@ void GenericFilter<T>::normalizeCoeffs()
 }
 
 template <typename T>
-bool GenericFilter<T>::checkCoeffs(const vectX_t<T>& aCoeff, const vectX_t<T>& bCoeff)
+void GenericFilter<T>::checkCoeffs(const vectX_t<T>& aCoeff, const vectX_t<T>& bCoeff)
 {
-    m_status = FilterStatus::NONE;
-    if (aCoeff.size() == 0)
-        m_status = FilterStatus::A_COEFF_MISSING;
-    else if (std::abs(aCoeff[0]) < std::numeric_limits<T>::epsilon())
-        m_status = FilterStatus::BAD_A_COEFF;
-
-    if (bCoeff.size() == 0)
-        m_status = (m_status == FilterStatus::A_COEFF_MISSING ? FilterStatus::ALL_COEFF_MISSING : FilterStatus::B_COEFF_MISSING);
-
-    if (m_status == FilterStatus::NONE)
-        m_status = FilterStatus::READY;
-
-    return m_status == FilterStatus::READY;
+    Expects(aCoeff.size() > 0);
+    Expects(std::abs(aCoeff[0]) > std::numeric_limits<T>::epsilon());
+    Expects(bCoeff.size() > 0);
 }
 
 } // namespace difi

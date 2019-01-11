@@ -25,8 +25,10 @@
 
 #pragma once
 
+#include "gsl/gsl_assert.h"
 #include "type_checks.h"
 #include "typedefs.h"
+#include <limits>
 
 namespace difi {
 
@@ -69,6 +71,7 @@ struct BilinearTransform {
 template <typename T>
 void BilinearTransform<T>::SToZ(SubType fs, const T& sPlanePole, T& zPlanePole)
 {
+    Expects(std::abs(2 * fs - sPlanePole) > std::numeric_limits<SubType>::epsilon()); // Divide-by-zero otherwise
     T scalePole = sPlanePole / (2 * fs);
     zPlanePole = (T(1) + scalePole) / (T(1) - scalePole);
 }
@@ -76,7 +79,7 @@ void BilinearTransform<T>::SToZ(SubType fs, const T& sPlanePole, T& zPlanePole)
 template <typename T>
 void BilinearTransform<T>::SToZ(SubType fs, const vectX_t<T>& sPlanePoles, Eigen::Ref<vectX_t<T>>& zPlanePoles)
 {
-    assert(sPlanePoles.size() == zPlanePoles.size());
+    Expects(sPlanePoles.size() == zPlanePoles.size());
     for (Eigen::Index k = 0; k < sPlanePoles.size(); ++k)
         SToZ(fs, sPlanePoles(k), zPlanePoles(k));
 }
@@ -84,6 +87,7 @@ void BilinearTransform<T>::SToZ(SubType fs, const vectX_t<T>& sPlanePoles, Eigen
 template <typename T>
 void BilinearTransform<T>::ZToS(SubType fs, const T& zPlanePole, T& sPlanePole)
 {
+    Expects(std::abs(T(1) + zPlanePole) > std::numeric_limits<SubType>::epsilon()); // Divide-by-zero otherwise
     T invPole = T(1) / zPlanePole;
     sPlanePole = 2 * fs * (T(1) - invPole) / (T(1) + invPole);
 }
@@ -91,7 +95,7 @@ void BilinearTransform<T>::ZToS(SubType fs, const T& zPlanePole, T& sPlanePole)
 template <typename T>
 void BilinearTransform<T>::ZToS(SubType fs, const vectX_t<T>& zPlanePoles, Eigen::Ref<vectX_t<T>>& sPlanePoles)
 {
-    assert(zPlanePoles.size() == sPlanePoles.size());
+    Expects(sPlanePoles.size() == zPlanePoles.size());
     for (Eigen::Index k = 0; k < sPlanePoles.size(); ++k)
         ZToS(fs, zPlanePoles(k), sPlanePoles(k));
 }

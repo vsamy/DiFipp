@@ -47,13 +47,6 @@ class GenericFilter {
     static_assert(std::is_floating_point<T>::value && !std::is_const<T>::value, "Only accept non-complex floating point types.");
 
 public:
-    /*! \brief Get the meaning of the filter status.
-     * \param status Filter status to get the meaning from.
-     * \return The meaning.
-     */
-    static std::string filterStatus(FilterStatus status);
-
-public:
     /*! \brief Filter a new data.
      * 
      * This function is practical for online application that does not know the whole signal in advance.
@@ -75,22 +68,22 @@ public:
      * \param data Signal.
      * \return False if vector's lengths do not match.
      */
-    bool getFilterResults(Eigen::Ref<vectX_t<T>> results, const vectX_t<T>& data);
+    void getFilterResults(Eigen::Ref<vectX_t<T>> results, const vectX_t<T>& data);
     /*! \brief Reset the data and filtered data. */
-    void resetFilter();
+    void resetFilter() noexcept;
     /*! \brief Get digital filter coefficients.
      * 
      * It will automatically resize the given vectors.
      * \param[out] aCoeff Denominator coefficients of the filter in decreasing order.
      * \param[out] bCoeff Numerator coefficients of the filter in decreasing order.
      */
-    void getCoeffs(vectX_t<T>& aCoeff, vectX_t<T>& bCoeff) const;
-    /*! \brief Return the current filter status. */
-    FilterStatus status() const noexcept { return m_status; }
+    void getCoeffs(vectX_t<T>& aCoeff, vectX_t<T>& bCoeff) const noexcept;
     /*! \brief Return the order the denominator polynome order of the filter. */
     Eigen::Index aOrder() const noexcept { return m_aCoeff.size(); }
     /*! \brief Return the order the numerator polynome order of the filter. */
     Eigen::Index bOrder() const noexcept { return m_bCoeff.size(); }
+    /*! \brief Return the initialization state of the filter0 */
+    bool isInitialized() const noexcept { return m_isInitialized; }
 
 protected:
     /*! \brief Default uninitialized constructor. */
@@ -120,12 +113,10 @@ protected:
      * \param bCoeff Numerator coefficients of the filter.
      * \return True if the filter status is set on READY.
      */
-    bool checkCoeffs(const vectX_t<T>& aCoeff, const vectX_t<T>& bCoeff);
-
-protected:
-    FilterStatus m_status; /*!< Filter status */
+    void checkCoeffs(const vectX_t<T>& aCoeff, const vectX_t<T>& bCoeff);
 
 private:
+    bool m_isInitialized = false; /*!< Initialization state of the filter. Default is false */
     vectX_t<T> m_aCoeff; /*!< Denominator coefficients of the filter */
     vectX_t<T> m_bCoeff; /*!< Numerator coefficients of the filter */
     vectX_t<T> m_filteredData; /*!< Last set of filtered data */

@@ -50,11 +50,7 @@ public:
     /*! \brief Set the size of the moving average window. */
     void setWindowSize(int windowSize)
     {
-        if (windowSize <= 0) {
-            m_status = FilterStatus::BAD_ORDER_SIZE;
-            return;
-        }
-
+        Expects(windowSize > 0);
         setCoeffs(vectX_t<T>::Constant(1, T(1)), vectX_t<T>::Constant(windowSize, T(1) / windowSize));
     }
     /*! \brief Get the size of the moving average window. */

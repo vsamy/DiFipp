@@ -27,26 +27,31 @@
 
 #include "difi"
 #include <boost/test/unit_test.hpp>
+#include <exception>
 #include <vector>
 
 BOOST_AUTO_TEST_CASE(FILTER_FAILURES)
 {
-    auto dfd = difi::DigitalFilterd(Eigen::VectorXd(), Eigen::VectorXd::Constant(2, 0));
-    BOOST_REQUIRE(dfd.status() == difi::FilterStatus::A_COEFF_MISSING);
-    dfd = difi::DigitalFilterd(Eigen::VectorXd::Constant(2, 1), Eigen::VectorXd());
-    BOOST_REQUIRE(dfd.status() == difi::FilterStatus::B_COEFF_MISSING);
-    dfd = difi::DigitalFilterd(Eigen::VectorXd(), Eigen::VectorXd());
-    BOOST_REQUIRE(dfd.status() == difi::FilterStatus::ALL_COEFF_MISSING);
-    dfd = difi::DigitalFilterd(Eigen::VectorXd::Constant(2, 0), Eigen::VectorXd::Constant(2, 0));
-    BOOST_REQUIRE(dfd.status() == difi::FilterStatus::BAD_A_COEFF);
-    dfd = difi::DigitalFilterd();
-    BOOST_REQUIRE(dfd.status() == difi::FilterStatus::NONE);
-    dfd = difi::DigitalFilterd(Eigen::VectorXd::Constant(2, 1), Eigen::VectorXd::Constant(2, 0));
-    BOOST_REQUIRE(dfd.status() == difi::FilterStatus::READY);
-    auto mad = difi::MovingAveraged(0);
-    BOOST_REQUIRE(mad.status() == difi::FilterStatus::BAD_ORDER_SIZE);
-    auto bfd = difi::Butterworthd(0, 10, 100);
-    BOOST_REQUIRE(bfd.status() == difi::FilterStatus::BAD_ORDER_SIZE);
-    bfd = difi::Butterworthd(5, 6, 5, 100);
-    BOOST_REQUIRE(bfd.status() == difi::FilterStatus::BAD_BAND_FREQUENCY);
+    // A coeff are missing
+    BOOST_REQUIRE_THROW(difi::DigitalFilterd(Eigen::VectorXd(), Eigen::VectorXd::Constant(2, 0)), std::logic_error);
+    // B coeff are missing
+    BOOST_REQUIRE_THROW(difi::DigitalFilterd(Eigen::VectorXd::Constant(2, 1), Eigen::VectorXd()), std::logic_error);
+    // aCoeff(0) = 0
+    BOOST_REQUIRE_THROW(difi::DigitalFilterd(Eigen::VectorXd::Constant(2, 0), Eigen::VectorXd::Constant(2, 0)), std::logic_error);
+    // Filter left uninitialized
+    BOOST_REQUIRE_NO_THROW(difi::DigitalFilterd());
+    auto df = difi::DigitalFilterd();
+    // Filter data with uninitialized filter
+    BOOST_REQUIRE_THROW(df.stepFilter(10.), std::logic_error);
+    // window <= 0
+    BOOST_REQUIRE_THROW(difi::MovingAveraged(0), std::logic_error);
+    // order <= 0
+    BOOST_REQUIRE_THROW(difi::Butterworthd(0, 10, 100), std::logic_error);
+    // fc > 2*fs
+    BOOST_REQUIRE_THROW(difi::Butterworthd(2, 60, 100), std::logic_error);
+    // Upper frequency < lower frequency
+    BOOST_REQUIRE_THROW(difi::Butterworthd(2, 6, 5, 100), std::logic_error);
+
+    // Ok
+    BOOST_REQUIRE_NO_THROW(difi::DigitalFilterd(Eigen::VectorXd::Constant(2, 1), Eigen::VectorXd::Constant(2, 0)));
 }

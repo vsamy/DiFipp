@@ -24,6 +24,7 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 set(HEADERS
+    gsl/gsl_assert.h
     BilinearTransform.h
     Butterworth.h
     Butterworth.tpp
