@@ -24,7 +24,6 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 set(HEADERS
-    gsl/gsl_assert.h
     BilinearTransform.h
     Butterworth.h
     Butterworth.tpp
@@ -38,10 +37,13 @@ set(HEADERS
     typedefs.h
 )
 
+set(GSL_HEADERS gsl/gsl_assert.h)
+
 add_library(${PROJECT_NAME} INTERFACE)
-target_include_directories(${PROJECT_NAME} INTERFACE ${HEADERS})
+target_include_directories(${PROJECT_NAME} INTERFACE ${HEADERS} ${GSL_HEADERS})
 install(TARGETS ${PROJECT_NAME}
     RUNTIME DESTINATION bin
     LIBRARY DESTINATION lib
     ARCHIVE DESTINATION lib)
 install(FILES ${HEADERS} DESTINATION ${INCLUDE_INSTALL_DESTINATION})
+install(FILES ${GSL_HEADERS} DESTINATION ${INCLUDE_INSTALL_DESTINATION}/gsl)

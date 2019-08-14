@@ -25,6 +25,7 @@
 
 #pragma once
 
+#include "gsl/gsl_assert.h"
 #include "type_checks.h"
 #include "typedefs.h"
 #include <stddef.h>

@@ -30,6 +30,9 @@
 namespace difi {
 
 template <typename T>
+constexpr T pi = T(3.14159265358979323846264338327950288419716939937510582097494459230781L);
+
+template <typename T>
 using vectX_t = Eigen::Matrix<T, Eigen::Dynamic, 1>; /*!< Eigen column-vector */
 
 template <typename T>

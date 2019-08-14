@@ -27,7 +27,6 @@
 
 #include "DigitalFilter.h"
 #include "typedefs.h"
-#include <cmath>
 #include <complex>
 
 namespace difi {
@@ -44,9 +43,6 @@ namespace difi {
  */
 template <typename T>
 class Butterworth : public DigitalFilter<T> {
-public:
-    static T PI; /*!< pi depending on the type T */
-
 public:
     /*! \brief Type of butterworth filter0 */
     enum class Type {

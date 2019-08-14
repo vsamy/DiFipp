@@ -26,6 +26,7 @@
 #pragma once
 
 #include "DigitalFilter.h"
+#include "gsl/gsl_assert.h"
 #include "typedefs.h"
 
 namespace difi {

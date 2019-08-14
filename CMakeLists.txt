@@ -63,8 +63,6 @@ if(MSVC)
     set(CMAKE_MSVCIDE_RUN_PATH "\$(SolutionDir)/src/\$(Configuration)")
 endif()
 
-add_compile_options("-D_USE_MATH_DEFINES")
-
 # Eigen
 set(Eigen_REQUIRED "eigen3 >= 3.3")
 search_for_eigen()

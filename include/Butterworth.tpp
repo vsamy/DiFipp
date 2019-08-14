@@ -29,17 +29,14 @@
 namespace difi {
 
 template <typename T>
-T Butterworth<T>::PI = static_cast<T>(M_PI);
-
-template <typename T>
 std::pair<int, T> Butterworth<T>::findMinimumButter(T wPass, T wStop, T APass, T AStop)
 {
     Expects(wPass > T(0) && wPass < T(1));
     Expects(wStop > T(0) && wPass < T(1));
     T num = std::log10((std::pow(T(10), T(0.1) * std::abs(AStop)) - 1) / (std::pow(T(10), T(0.1) * std::abs(APass)) - 1));
     // pre-warp
-    T fwPass = std::tan(T(0.5) * PI * wPass);
-    T fwStop = std::tan(T(0.5) * PI * wStop);
+    T fwPass = std::tan(T(0.5) * pi<T> * wPass);
+    T fwStop = std::tan(T(0.5) * pi<T> * wStop);
     T w;
     if (wPass < wStop)
         w = std::abs(fwStop / fwPass);
@@ -54,7 +51,7 @@ std::pair<int, T> Butterworth<T>::findMinimumButter(T wPass, T wStop, T APass, T
     else
         ctf = fwPass / ctf;
 
-    return std::pair<int, T>(order, T(2) * std::atan(ctf) / PI);
+    return std::pair<int, T>(order, T(2) * std::atan(ctf) / pi<T>);
 }
 
 template <typename T>
@@ -111,7 +108,7 @@ template <typename T>
 void Butterworth<T>::computeDigitalRep(T fc)
 {
     // Continuous pre-warped frequency
-    T fpw = (m_fs / PI) * std::tan(PI * fc / m_fs);
+    T fpw = (m_fs / pi<T>)*std::tan(pi<T> * fc / m_fs);
 
     // Compute poles
     vectXc_t<T> poles(m_order);
@@ -138,8 +135,8 @@ void Butterworth<T>::computeDigitalRep(T fc)
 template <typename T>
 void Butterworth<T>::computeBandDigitalRep(T fLower, T fUpper)
 {
-    T fpw1 = (m_fs / PI) * std::tan(PI * fLower / m_fs);
-    T fpw2 = (m_fs / PI) * std::tan(PI * fUpper / m_fs);
+    T fpw1 = (m_fs / pi<T>)*std::tan(pi<T> * fLower / m_fs);
+    T fpw2 = (m_fs / pi<T>)*std::tan(pi<T> * fUpper / m_fs);
     T fpw0 = std::sqrt(fpw1 * fpw2);
 
     vectXc_t<T> poles(2 * m_order);
@@ -161,7 +158,7 @@ void Butterworth<T>::computeBandDigitalRep(T fLower, T fUpper)
     }
 
     if (m_type == Type::BandPass)
-        scaleAmplitude(aCoeff, bCoeff, std::exp(std::complex<T>(T(0), T(2) * PI * std::sqrt(fLower * fUpper) / m_fs)));
+        scaleAmplitude(aCoeff, bCoeff, std::exp(std::complex<T>(T(0), T(2) * pi<T> * std::sqrt(fLower * fUpper) / m_fs)));
     else
         scaleAmplitude(aCoeff, bCoeff);
 
@@ -171,16 +168,16 @@ void Butterworth<T>::computeBandDigitalRep(T fLower, T fUpper)
 template <typename T>
 std::complex<T> Butterworth<T>::generateAnalogPole(int k, T fpw1)
 {
-    auto thetaK = [pi = PI, order = m_order](int k) -> T {
+    auto thetaK = [pi = pi<T>, order = m_order](int k) -> T {
         return (2 * k - 1) * pi / (2 * order);
     };
 
     std::complex<T> analogPole(-std::sin(thetaK(k)), std::cos(thetaK(k)));
     switch (m_type) {
     case Type::HighPass:
-        return T(2) * PI * fpw1 / analogPole;
+        return T(2) * pi<T> * fpw1 / analogPole;
     case Type::LowPass:
-        return T(2) * PI * fpw1 * analogPole;
+        return T(2) * pi<T> * fpw1 * analogPole;
     default:
         GSL_ASSUME(0);
     }
@@ -189,13 +186,13 @@ std::complex<T> Butterworth<T>::generateAnalogPole(int k, T fpw1)
 template <typename T>
 std::pair<std::complex<T>, std::complex<T>> Butterworth<T>::generateBandAnalogPole(int k, T fpw0, T bw)
 {
-    auto thetaK = [pi = PI, order = m_order](int k) -> T {
+    auto thetaK = [pi = pi<T>, order = m_order](int k) -> T {
         return (2 * k - 1) * pi / (2 * order);
     };
 
     std::complex<T> analogPole(-std::sin(thetaK(k)), std::cos(thetaK(k)));
     std::pair<std::complex<T>, std::complex<T>> poles;
-    std::complex<T> s0 = T(2) * PI * fpw0;
+    std::complex<T> s0 = T(2) * pi<T> * fpw0;
     std::complex<T> s = T(0.5) * bw / fpw0;
     switch (m_type) {
     case Type::BandReject:
@@ -222,7 +219,7 @@ vectXc_t<T> Butterworth<T>::generateAnalogZeros(T fpw0)
     case Type::BandPass:
         return (vectXc_t<T>(2 * m_order) << vectXc_t<T>::Constant(m_order, std::complex<T>(-1)), vectXc_t<T>::Constant(m_order, std::complex<T>(1))).finished();
     case Type::BandReject: {
-        T w0 = T(2) * std::atan(PI * fpw0 / m_fs);
+        T w0 = T(2) * std::atan(pi<T> * fpw0 / m_fs);
         return (vectXc_t<T>(2 * m_order) << vectXc_t<T>::Constant(m_order, std::exp(std::complex<T>(0, w0))), vectXc_t<T>::Constant(m_order, std::exp(std::complex<T>(0, -w0)))).finished();
     }
     case Type::LowPass:
