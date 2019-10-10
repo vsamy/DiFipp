@@ -1,7 +1,7 @@
 DiFi++
 ======
 
-[License BSD 3-Clause](https://tldrlegal.com/license/bsd-3-clause-license-(revised)#fulltext)
+[License BSD 2-Clause](https://tldrlegal.com/license/bsd-2-clause-license-(freebsd)#fulltext)
 
 DiFi++ is a small c++ header-only library  for **DI**gital **FI**lters based on rational transfer functions such as the butterworth filter and the moving average filter. DiFi++ is using the Eigen library for math computations.
 
