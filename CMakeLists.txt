@@ -32,6 +32,7 @@ set(PROJECT_NAME diFi++)
 set(PROJECT_DESCRIPTION "Filter using rational transfer function")
 set(PROJECT_URL "https://github.com/vsamy/DiFipp")
 SET(PROJECT_DEBUG_POSTFIX "_d")
+set(INSTALL_GENERATED_HEADERS OFF)
 
 set(DOXYGEN_USE_MATHJAX "NO")
 set(CMAKE_CXX_STANDARD 14)
