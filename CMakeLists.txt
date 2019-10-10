@@ -26,29 +26,26 @@
 # either expressed or implied, of the FreeBSD Project.
 
 # Version minimum
-cmake_minimum_required(VERSION 3.0.2)
-
-include(cmake/base.cmake)
-include(cmake/eigen.cmake)
-include(cmake/msvc-specific.cmake)
+cmake_minimum_required(VERSION 3.1.3)
 
 set(PROJECT_NAME diFi++)
 set(PROJECT_DESCRIPTION "Filter using rational transfer function")
-set(PROJECT_URL "...")
+set(PROJECT_URL "https://github.com/vsamy/DiFipp")
 SET(PROJECT_DEBUG_POSTFIX "_d")
 
-#SET(CXX_DISABLE_WERROR True)
 set(DOXYGEN_USE_MATHJAX "NO")
-
-project(${PROJECT_NAME} CXX)
 set(CMAKE_CXX_STANDARD 14)
 
-setup_project()
-
-option(DISABLE_TESTS "Disable unit tests." OFF)
+option(BUILD_TESTING "Disable unit tests." ON)
+option(BUILD_TEST_STATIC_BOOST "Build unit tests with static boost libraries" OFF)
 option(THROW_ON_CONTRACT_VIOLATION "Throw an error when program fails." ON)
 option(TERMINATE_ON_CONTRACT_VIOLATION "Terminate program when an error occurs. (Default)" OFF)
 option(UNENFORCED_ON_CONTRACT_VIOLATION "Do not perform any check." OFF)
+
+include(cmake/base.cmake)
+include(cmake/msvc-specific.cmake)
+
+project(${PROJECT_NAME} CXX)
 
 # Handle contracts specifications
 if(${THROW_ON_CONTRACT_VIOLATION})
@@ -61,19 +58,18 @@ endif()
 
 # for MSVC
 if(MSVC)
-    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /W1 /MP")
     set(CMAKE_MSVCIDE_RUN_PATH "\$(SolutionDir)/src/\$(Configuration)")
 endif()
 
 # Eigen
 set(Eigen_REQUIRED "eigen3 >= 3.3")
-search_for_eigen()
+add_project_dependency(Eigen3 REQUIRED)
 
 add_subdirectory(include)
 
-if(NOT ${DISABLE_TESTS})
+if(${BUILD_TESTING})
     add_subdirectory(tests)
 endif()
 
-pkg_config_append_libs(${PROJECT_NAME})
 setup_project_finalize()
+setup_project_package_finalize()

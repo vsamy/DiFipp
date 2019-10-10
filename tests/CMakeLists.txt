@@ -25,26 +25,28 @@
 # of the authors and should not be interpreted as representing official policies, 
 # either expressed or implied, of the FreeBSD Project.
 
-include(${CMAKE_SOURCE_DIR}/cmake/boost.cmake)
-
 enable_testing()
 
-set(BOOST_COMPONENTS unit_test_framework)
-search_for_boost()
-
-add_definitions(-DBOOST_TEST_DYN_LINK)
-include_directories(${Boost_INCLUDE_DIRS})
-include_directories(${CMAKE_SOURCE_DIR}/include)
-link_directories(${Boost_LIBRARY_DIR} ${Boost_LIBRARY_DIRS})
+if(${BUILD_TEST_STATIC_BOOST})
+    set(Boost_USE_STATIC_LIBS ON)
+    set(BUILD_SHARED_LIBS OFF)
+    set(BOOST_DEFS "")
+    set(BUILD_TYPE STATIC)
+else()
+    set(Boost_USE_STATIC_LIBS OFF)
+    set(BUILD_SHARED_LIBS ON)
+    set(BOOST_DEFS Boost::dynamic_linking)
+    set(BUILD_TYPE SHARED)
+endif()
+find_package(Boost REQUIRED COMPONENTS unit_test_framework)
 
 macro(addTest testName)
     add_executable(${testName} ${testName}.cpp)
-    if(NOT MSVC)
-        target_link_libraries(${testName} PUBLIC ${Boost_LIBRARIES})
-    endif()
-    add_test(${testName}Unit ${testName})
+    target_link_libraries(${testName} PRIVATE ${PROJECT_NAME} Boost::unit_test_framework)
     # Adding a project configuration file (for MSVC only)
-    GENERATE_MSVC_DOT_USER_FILE(${testName})
+    generate_msvc_dot_user_file(${testName})
+
+    add_test(${testName}Unit ${testName})
 endmacro(addTest)
 
 addTest(GenericFilterTests)
