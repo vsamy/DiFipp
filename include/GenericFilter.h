@@ -35,6 +35,9 @@
 
 namespace difi {
 
+// TODO: noexcept(Function of gsl variable)
+// TODO: constructor with universal refs
+
 /*! \brief Low-level filter.
  * 
  * It creates the basic and common functions of all linear filter that can written as a digital filter.
@@ -48,6 +51,12 @@ namespace difi {
 template <typename T>
 class GenericFilter {
     static_assert(std::is_floating_point<T>::value && !std::is_const<T>::value, "Only accept non-complex floating point types.");
+
+public:
+    enum class Type {
+        OneSided,
+        Centered
+    };
 
 public:
     /*! \brief Filter a new data.
@@ -64,16 +73,11 @@ public:
      * \return Filtered signal.
      */
     vectX_t<T> filter(const vectX_t<T>& data);
-    /*! \brief Filter a signal and store in a user-defined Eigen vector.
-     * 
-     * Useful if the length of the signal is known in advance.
-     * \param[out] results Filtered signal.
-     * \param data Signal.
-     * \return False if vector's lengths do not match.
-     */
-    void getFilterResults(Eigen::Ref<vectX_t<T>> results, const vectX_t<T>& data);
     /*! \brief Reset the data and filtered data. */
     void resetFilter() noexcept;
+
+    /*!< \brief Return the filter type */
+    Type type() const noexcept { return (m_center == 0 ? Type::OneSided : Type::Centered); }
     /*! \brief Get digital filter coefficients.
      * 
      * It will automatically resize the given vectors.
@@ -81,6 +85,10 @@ public:
      * \param[out] bCoeff Numerator coefficients of the filter in decreasing order.
      */
     void getCoeffs(vectX_t<T>& aCoeff, vectX_t<T>& bCoeff) const noexcept;
+    /*! \brief Return coefficients of the denominator polynome. */
+    const vectX_t<T>& aCoeff() const noexcept { return m_aCoeff; }
+    /*! \brief Return coefficients of the numerator polynome. */
+    const vectX_t<T>& bCoeff() const noexcept { return m_bCoeff; }
     /*! \brief Return the order the denominator polynome order of the filter. */
     Eigen::Index aOrder() const noexcept { return m_aCoeff.size(); }
     /*! \brief Return the order the numerator polynome order of the filter. */
@@ -94,11 +102,18 @@ protected:
     /*! \brief Constructor.
      * \param aCoeff Denominator coefficients of the filter in decreasing order.
      * \param bCoeff Numerator coefficients of the filter in decreasing order.
+     * \param center 
      */
-    GenericFilter(const vectX_t<T>& aCoeff, const vectX_t<T>& bCoeff);
+    GenericFilter(const vectX_t<T>& aCoeff, const vectX_t<T>& bCoeff, Type type = Type::OneSided);
     /*! \brief Default destructor. */
     virtual ~GenericFilter() = default;
 
+    /*! \brief Set type of filter (one-sided or centered)
+     * 
+     * \param type The filter type.
+     * \warning bCoeff must be set before.
+     */
+    void setType(Type type);
     /*! \brief Set the new coefficients of the filters.
      *
      * It awaits a universal reference.
@@ -116,9 +131,10 @@ protected:
      * \param bCoeff Numerator coefficients of the filter.
      * \return True if the filter status is set on READY.
      */
-    void checkCoeffs(const vectX_t<T>& aCoeff, const vectX_t<T>& bCoeff);
+    bool checkCoeffs(const vectX_t<T>& aCoeff, const vectX_t<T>& bCoeff, Type type);
 
 private:
+    Eigen::Index m_center = 0; /*!< Center of the filter. 0 is a one-sided filter. Default is 0. */
     bool m_isInitialized = false; /*!< Initialization state of the filter. Default is false */
     vectX_t<T> m_aCoeff; /*!< Denominator coefficients of the filter */
     vectX_t<T> m_bCoeff; /*!< Numerator coefficients of the filter */

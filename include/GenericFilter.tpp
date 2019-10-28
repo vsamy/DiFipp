@@ -2,13 +2,13 @@
 // All rights reserved.
 
 // Redistribution and use in source and binary forms, with or without
-// modification, are permitted provided that the following conditions are met: 
+// modification, are permitted provided that the following conditions are met:
 
 // 1. Redistributions of source code must retain the above copyright notice,
-//    this list of conditions and the following disclaimer. 
+//    this list of conditions and the following disclaimer.
 // 2. Redistributions in binary form must reproduce the above copyright notice,
 //    this list of conditions and the following disclaimer in the documentation
-//    and/or other materials provided with the distribution. 
+//    and/or other materials provided with the distribution.
 
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 // ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -22,7 +22,7 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // The views and conclusions contained in the software and documentation are those
-// of the authors and should not be interpreted as representing official policies, 
+// of the authors and should not be interpreted as representing official policies,
 // either expressed or implied, of the FreeBSD Project.
 
 #include <limits>
@@ -44,25 +44,18 @@ T GenericFilter<T>::stepFilter(const T& data)
 
     m_rawData[0] = data;
     m_filteredData[0] = 0;
-    m_filteredData[0] = m_bCoeff.dot(m_rawData) - m_aCoeff.dot(m_filteredData);
-    return m_filteredData[0];
+    m_filteredData[m_center] = m_bCoeff.dot(m_rawData) - m_aCoeff.dot(m_filteredData);
+    return m_filteredData[m_center];
 }
 
 template <typename T>
 vectX_t<T> GenericFilter<T>::filter(const vectX_t<T>& data)
 {
-    vectX_t<T> results(data.size());
-    getFilterResults(results, data);
-    return results;
-}
-
-template <typename T>
-void GenericFilter<T>::getFilterResults(Eigen::Ref<vectX_t<T>> results, const vectX_t<T>& data)
-{
     Expects(m_isInitialized);
-    Expects(results.size() == data.size());
+    vectX_t<T> results(data.size());
     for (Eigen::Index i = 0; i < data.size(); ++i)
         results(i) = stepFilter(data(i));
+    return results;
 }
 
 template <typename T>
@@ -73,12 +66,19 @@ void GenericFilter<T>::resetFilter() noexcept
 }
 
 template <typename T>
+void GenericFilter<T>::setType(Type type)
+{
+    Expects(type == Type::Centered ? m_bCoeff.size() > 2 && m_bCoeff.size() % 2 == 1 : true);
+    m_center = (type == Type::OneSided ? 0 : (m_bCoeff.size() - 1) / 2);
+}
+
+template <typename T>
 template <typename T2>
 void GenericFilter<T>::setCoeffs(T2&& aCoeff, T2&& bCoeff)
 {
     static_assert(std::is_convertible_v<T2, vectX_t<T>>, "The coefficients types should be convertible to vectX_t<T>");
 
-    checkCoeffs(aCoeff, bCoeff);
+    Expects(checkCoeffs(aCoeff, bCoeff, (m_center == 0 ? Type::OneSided : Type::Centered)));
     m_aCoeff = aCoeff;
     m_bCoeff = bCoeff;
     normalizeCoeffs();
@@ -96,13 +96,14 @@ void GenericFilter<T>::getCoeffs(vectX_t<T>& aCoeff, vectX_t<T>& bCoeff) const n
 // Protected functions
 
 template <typename T>
-GenericFilter<T>::GenericFilter(const vectX_t<T>& aCoeff, const vectX_t<T>& bCoeff)
+GenericFilter<T>::GenericFilter(const vectX_t<T>& aCoeff, const vectX_t<T>& bCoeff, Type type)
     : m_aCoeff(aCoeff)
     , m_bCoeff(bCoeff)
     , m_filteredData(aCoeff.size())
     , m_rawData(bCoeff.size())
 {
-    checkCoeffs(aCoeff, bCoeff);
+    Expects(checkCoeffs(aCoeff, bCoeff, type));
+    m_center = (type == Type::OneSided ? 0 : (bCoeff.size() - 1) / 2);
     normalizeCoeffs();
     resetFilter();
     m_isInitialized = true;
@@ -120,11 +121,10 @@ void GenericFilter<T>::normalizeCoeffs()
 }
 
 template <typename T>
-void GenericFilter<T>::checkCoeffs(const vectX_t<T>& aCoeff, const vectX_t<T>& bCoeff)
+bool GenericFilter<T>::checkCoeffs(const vectX_t<T>& aCoeff, const vectX_t<T>& bCoeff, Type type)
 {
-    Expects(aCoeff.size() > 0);
-    Expects(std::abs(aCoeff[0]) > std::numeric_limits<T>::epsilon());
-    Expects(bCoeff.size() > 0);
+    bool centering = (type == Type::Centered ? (bCoeff.size() % 2 == 1) : true);
+    return aCoeff.size() > 0 && std::abs(aCoeff[0]) > std::numeric_limits<T>::epsilon() && bCoeff.size() > 0 && centering;
 }
 
 } // namespace difi
