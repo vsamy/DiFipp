@@ -60,7 +60,7 @@ public:
     /*! \brief Function to help you design a Butterworth filter.
      * 
      * It finds optimal values of the order and cut-off frequency.
-     * \warning Works only for low-pass and high-pass filters.
+     * \note Works only for low-pass and high-pass filters.
      * \see http://www.matheonics.com/Tutorials/Butterworth.html#Paragraph_3.2
      * \see https://www.mathworks.com/help/signal/ref/buttord.html#d120e11079
      * \param wPass Pass band edge.

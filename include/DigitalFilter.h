@@ -50,6 +50,7 @@ public:
         : GenericFilter<T>(aCoeff, bCoeff)
     {
     }
+
     void setCoefficients(vectX_t<T>&& aCoeff, vectX_t<T>&& bCoeff)
     {
         setCoeffs(std::forward(aCoeff), std::forward(bCoeff));

@@ -27,37 +27,12 @@
 
 #pragma once
 
-#include "gsl/gsl_assert.h"
-#include "type_checks.h"
-#include "typedefs.h"
-#include <stddef.h>
-#include <string>
+#include "BaseFilter.h"
 
 namespace difi {
 
-// TODO: noexcept(Function of gsl variable)
-// TODO: constructor with universal refs
-
-/*! \brief Low-level filter.
- * 
- * It creates the basic and common functions of all linear filter that can written as a digital filter.
- * This class can not be instantiated directly.
- * 
- * \warning In Debug mode, all functions may throw if a filter is badly initialized.
- * This not the case in Realese mode.
- * 
- * \tparam T Floating type.
- */
 template <typename T>
-class GenericFilter {
-    static_assert(std::is_floating_point<T>::value && !std::is_const<T>::value, "Only accept non-complex floating point types.");
-
-public:
-    enum class Type {
-        OneSided,
-        Centered
-    };
-
+class GenericFilter : BaseFilter<T, GenericFilter<T>> {
 public:
     /*! \brief Filter a new data.
      * 
@@ -73,73 +48,46 @@ public:
      * \return Filtered signal.
      */
     vectX_t<T> filter(const vectX_t<T>& data);
-    /*! \brief Reset the data and filtered data. */
-    void resetFilter() noexcept;
 
-    /*!< \brief Return the filter type */
-    Type type() const noexcept { return (m_center == 0 ? Type::OneSided : Type::Centered); }
-    /*! \brief Get digital filter coefficients.
-     * 
-     * It will automatically resize the given vectors.
-     * \param[out] aCoeff Denominator coefficients of the filter in decreasing order.
-     * \param[out] bCoeff Numerator coefficients of the filter in decreasing order.
-     */
-    void getCoeffs(vectX_t<T>& aCoeff, vectX_t<T>& bCoeff) const noexcept;
-    /*! \brief Return coefficients of the denominator polynome. */
-    const vectX_t<T>& aCoeff() const noexcept { return m_aCoeff; }
-    /*! \brief Return coefficients of the numerator polynome. */
-    const vectX_t<T>& bCoeff() const noexcept { return m_bCoeff; }
-    /*! \brief Return the order the denominator polynome order of the filter. */
-    Eigen::Index aOrder() const noexcept { return m_aCoeff.size(); }
-    /*! \brief Return the order the numerator polynome order of the filter. */
-    Eigen::Index bOrder() const noexcept { return m_bCoeff.size(); }
-    /*! \brief Return the initialization state of the filter0 */
-    bool isInitialized() const noexcept { return m_isInitialized; }
+    void resetFilter() noexcept 
 
 protected:
-    /*! \brief Default uninitialized constructor. */
     GenericFilter() = default;
-    /*! \brief Constructor.
-     * \param aCoeff Denominator coefficients of the filter in decreasing order.
-     * \param bCoeff Numerator coefficients of the filter in decreasing order.
-     * \param center 
-     */
-    GenericFilter(const vectX_t<T>& aCoeff, const vectX_t<T>& bCoeff, Type type = Type::OneSided);
-    /*! \brief Default destructor. */
-    virtual ~GenericFilter() = default;
+    GenericFilter(const vectX_t<T>& aCoeff, const vectX_t<T>& bCoeff, Type type = Type::Forward)
+        : BaseFilter(aCoeff, bCoeff, type)
+    {}
+};
 
-    /*! \brief Set type of filter (one-sided or centered)
+template <typename T>
+class TVGenericFilter : BaseFilter<T, GenericFilter<T>> {
+public:
+    /*! \brief Filter a new data.
      * 
-     * \param type The filter type.
-     * \warning bCoeff must be set before.
+     * This function is practical for online application that does not know the whole signal in advance.
+     * \param data New data to filter.
+     * \return Filtered data.
      */
-    void setType(Type type);
-    /*! \brief Set the new coefficients of the filters.
-     *
-     * It awaits a universal reference.
-     * \param aCoeff Denominator coefficients of the filter in decreasing order.
-     * \param bCoeff Numerator coefficients of the filter in decreasing order.
-     */
-    template <typename T2>
-    void setCoeffs(T2&& aCoeff, T2&& bCoeff);
-    /*! \brief Normalized the filter coefficients such that aCoeff(0) = 1. */
-    void normalizeCoeffs();
-    /*! \brief Check for bad coefficients.
+    T stepFilter(const T& data, const T& time);
+    /*! \brief Filter a signal.
      * 
-     * Set the filter status to ready is everything is fine.
-     * \param aCoeff Denominator coefficients of the filter.
-     * \param bCoeff Numerator coefficients of the filter.
-     * \return True if the filter status is set on READY.
+     * Filter all data given by the signal.
+     * \param data Signal.
+     * \return Filtered signal.
      */
-    bool checkCoeffs(const vectX_t<T>& aCoeff, const vectX_t<T>& bCoeff, Type type);
+    vectX_t<T> filter(const vectX_t<T>& data, const vectX_t<T>& time);
+
+protected:
+    GenericFilter() = default;
+    GenericFilter(const vectX_t<T>& aCoeff, const vectX_t<T>& bCoeff, Type type = Type::Forward)
+        : BaseFilter(aCoeff, bCoeff, type)
+    {
+        m_timers.resize(m_bCoeffs.size());
+        m_timeDiffs.resize(m_bCoeffs.size());
+    }
 
 private:
-    Eigen::Index m_center = 0; /*!< Center of the filter. 0 is a one-sided filter. Default is 0. */
-    bool m_isInitialized = false; /*!< Initialization state of the filter. Default is false */
-    vectX_t<T> m_aCoeff; /*!< Denominator coefficients of the filter */
-    vectX_t<T> m_bCoeff; /*!< Numerator coefficients of the filter */
-    vectX_t<T> m_filteredData; /*!< Last set of filtered data */
-    vectX_t<T> m_rawData; /*!< Last set of non-filtered data */
+    vectX_t<T> m_timers;
+    vectX_t<T> m_timeDiffs;
 };
 
 } // namespace difi

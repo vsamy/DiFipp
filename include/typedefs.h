@@ -43,4 +43,9 @@ using vectN_t = Eigen::Matrix<T, N, 1>; /*!< Fixed Eigen column-vector */
 template <typename T>
 using vectXc_t = vectX_t<std::complex<T>>; /*!< Eigen complex column-vector */
 
+enum class FilterType {
+    Forward,
+    Centered
+};
+
 } // namespace difi

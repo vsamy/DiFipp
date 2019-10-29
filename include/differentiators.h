@@ -226,7 +226,7 @@ public:
     T timestep() const noexcept { return std::pow(bCoeff()(0) / CoeffGetter<T, N>()(0), T(1) / Order); }
 };
 
-template <typename T, size_t N, template<class, class> typename CoeffGetter>
+template <typename T, size_t N, int Order, template<class, class> typename CoeffGetter>
 class CentralDifferentiator : public GenericFilter<T> {
 public:
     CentralDifferentiator() 

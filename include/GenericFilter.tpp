@@ -25,11 +25,7 @@
 // of the authors and should not be interpreted as representing official policies,
 // either expressed or implied, of the FreeBSD Project.
 
-#include <limits>
-
 namespace difi {
-
-// Public functions
 
 template <typename T>
 T GenericFilter<T>::stepFilter(const T& data)
@@ -42,10 +38,10 @@ T GenericFilter<T>::stepFilter(const T& data)
     for (Eigen::Index i = m_filteredData.size() - 1; i > 0; --i)
         m_filteredData(i) = m_filteredData(i - 1);
 
-    m_rawData[0] = data;
-    m_filteredData[0] = 0;
-    m_filteredData[m_center] = m_bCoeff.dot(m_rawData) - m_aCoeff.dot(m_filteredData);
-    return m_filteredData[m_center];
+    m_rawData(0) = data;
+    m_filteredData(0) = 0;
+    m_filteredData(m_center) = m_bCoeff.dot(m_rawData) - m_aCoeff.dot(m_filteredData);
+    return m_filteredData(m_center);
 }
 
 template <typename T>
@@ -66,65 +62,54 @@ void GenericFilter<T>::resetFilter() noexcept
 }
 
 template <typename T>
-void GenericFilter<T>::setType(Type type)
+T TVGenericFilter<T>::stepFilter(const T& data, const T& time)
 {
-    Expects(type == Type::Centered ? m_bCoeff.size() > 2 && m_bCoeff.size() % 2 == 1 : true);
-    m_center = (type == Type::OneSided ? 0 : (m_bCoeff.size() - 1) / 2);
+    Expects(m_isInitialized);
+
+    // Slide data (can't use SIMD, but should be small)
+    for (Eigen::Index i = m_rawData.size() - 1; i > 0; --i) {
+        m_rawData(i) = m_rawData(i - 1);
+        m_timers(i) = m_timers(i - 1);
+    }
+    for (Eigen::Index i = m_filteredData.size() - 1; i > 0; --i)
+        m_filteredData(i) = m_filteredData(i - 1);
+
+    m_timers(0) = time;
+    if (m_center == 0) {
+        for (Eigen::Index i = m_rawData.size() - 1; i > 0; --i)
+            m_timeDiffs(i) = m_timeDiffs(i - 1);
+        m_timeDiffs(0) = time - m_timers(1);
+    } else {
+        const Eigen::Index S = data.size() - 1;
+        const Eigen::Index M = S / 2;
+        m_timeDiffs(M) = T(1);
+        for (Eigen::Index i = 0; i < M; ++i)
+            m_timeDiffs(i) = m_timers(i) - m_timers(S - i);
+    }
+    m_rawData(0) = data;
+    m_filteredData(0) = 0;
+    m_filteredData(m_center) = (m_bCoeff.cwiseQuotient(m_timeDiffs)).dot(m_rawData) - m_aCoeff.dot(m_filteredData);
+    return m_filteredData(m_center);
 }
 
 template <typename T>
-template <typename T2>
-void GenericFilter<T>::setCoeffs(T2&& aCoeff, T2&& bCoeff)
+vectX_t<T> TVGenericFilter<T>::filter(const vectX_t<T>& data, const vectX_t<T>& time)
 {
-    static_assert(std::is_convertible_v<T2, vectX_t<T>>, "The coefficients types should be convertible to vectX_t<T>");
-
-    Expects(checkCoeffs(aCoeff, bCoeff, (m_center == 0 ? Type::OneSided : Type::Centered)));
-    m_aCoeff = aCoeff;
-    m_bCoeff = bCoeff;
-    normalizeCoeffs();
-    resetFilter();
-    m_isInitialized = true;
+    Expects(m_isInitialized);
+    Expects(data.size() == time.size());
+    vectX_t<T> results(data.size());
+    for (Eigen::Index i = 0; i < data.size(); ++i)
+        results(i) = stepFilter(data(i), time(i));
+    return results;
 }
 
 template <typename T>
-void GenericFilter<T>::getCoeffs(vectX_t<T>& aCoeff, vectX_t<T>& bCoeff) const noexcept
+void GenericFilter<T>::resetFilter() noexcept
 {
-    aCoeff = m_aCoeff;
-    bCoeff = m_bCoeff;
-}
-
-// Protected functions
-
-template <typename T>
-GenericFilter<T>::GenericFilter(const vectX_t<T>& aCoeff, const vectX_t<T>& bCoeff, Type type)
-    : m_aCoeff(aCoeff)
-    , m_bCoeff(bCoeff)
-    , m_filteredData(aCoeff.size())
-    , m_rawData(bCoeff.size())
-{
-    Expects(checkCoeffs(aCoeff, bCoeff, type));
-    m_center = (type == Type::OneSided ? 0 : (bCoeff.size() - 1) / 2);
-    normalizeCoeffs();
-    resetFilter();
-    m_isInitialized = true;
-}
-
-template <typename T>
-void GenericFilter<T>::normalizeCoeffs()
-{
-    T a0 = m_aCoeff(0);
-    if (std::abs(a0 - T(1)) < std::numeric_limits<T>::epsilon())
-        return;
-
-    m_aCoeff /= a0;
-    m_bCoeff /= a0;
-}
-
-template <typename T>
-bool GenericFilter<T>::checkCoeffs(const vectX_t<T>& aCoeff, const vectX_t<T>& bCoeff, Type type)
-{
-    bool centering = (type == Type::Centered ? (bCoeff.size() % 2 == 1) : true);
-    return aCoeff.size() > 0 && std::abs(aCoeff[0]) > std::numeric_limits<T>::epsilon() && bCoeff.size() > 0 && centering;
+    m_filteredData.setZero(m_aCoeff.size());
+    m_rawData.setZero(m_bCoeff.size());
+    m_timers.setZero(m_bCoeff.size());
+    m_timerDiffs.setZero(m_bCoeff.size());
 }
 
 } // namespace difi
