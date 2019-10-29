@@ -32,7 +32,7 @@
 namespace difi {
 
 template <typename T>
-class GenericFilter : BaseFilter<T, GenericFilter<T>> {
+class GenericFilter : public BaseFilter<T, GenericFilter<T>> {
 public:
     /*! \brief Filter a new data.
      * 
@@ -49,17 +49,17 @@ public:
      */
     vectX_t<T> filter(const vectX_t<T>& data);
 
-    void resetFilter() noexcept 
+    void resetFilter() noexcept;
 
 protected:
     GenericFilter() = default;
-    GenericFilter(const vectX_t<T>& aCoeff, const vectX_t<T>& bCoeff, Type type = Type::Forward)
+    GenericFilter(const vectX_t<T>& aCoeff, const vectX_t<T>& bCoeff, FilterType type = FilterType::Forward)
         : BaseFilter(aCoeff, bCoeff, type)
     {}
 };
 
 template <typename T>
-class TVGenericFilter : BaseFilter<T, GenericFilter<T>> {
+class TVGenericFilter : public BaseFilter<T, GenericFilter<T>> {
 public:
     /*! \brief Filter a new data.
      * 
@@ -76,16 +76,21 @@ public:
      */
     vectX_t<T> filter(const vectX_t<T>& data, const vectX_t<T>& time);
 
+    void resetFilter() noexcept;
+
 protected:
-    GenericFilter() = default;
-    GenericFilter(const vectX_t<T>& aCoeff, const vectX_t<T>& bCoeff, Type type = Type::Forward)
+    TVGenericFilter() = default;
+    TVGenericFilter(int order, const vectX_t<T>& aCoeff, const vectX_t<T>& bCoeff, FilterType type = FilterType::Forward)
         : BaseFilter(aCoeff, bCoeff, type)
+        , m_order(order)
     {
+        Expects(order >= 1);
         m_timers.resize(m_bCoeffs.size());
         m_timeDiffs.resize(m_bCoeffs.size());
     }
 
 private:
+    int m_order = 1;
     vectX_t<T> m_timers;
     vectX_t<T> m_timeDiffs;
 };

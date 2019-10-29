@@ -78,13 +78,16 @@ T TVGenericFilter<T>::stepFilter(const T& data, const T& time)
     if (m_center == 0) {
         for (Eigen::Index i = m_rawData.size() - 1; i > 0; --i)
             m_timeDiffs(i) = m_timeDiffs(i - 1);
-        m_timeDiffs(0) = time - m_timers(1);
+        m_timeDiffs(0) = std::pow(time - m_timers(1), m_order);
     } else {
         const Eigen::Index S = data.size() - 1;
         const Eigen::Index M = S / 2;
         m_timeDiffs(M) = T(1);
-        for (Eigen::Index i = 0; i < M; ++i)
-            m_timeDiffs(i) = m_timers(i) - m_timers(S - i);
+        for (Eigen::Index i = 1; i < M; ++i) {
+            const T diff = std::pow(m_timers(M - i) - m_timers(M + i), m_order);
+            m_timeDiffs(M + i) = diff;
+            m_timeDiffs(M - i) = diff;
+        }
     }
     m_rawData(0) = data;
     m_filteredData(0) = 0;
@@ -104,7 +107,7 @@ vectX_t<T> TVGenericFilter<T>::filter(const vectX_t<T>& data, const vectX_t<T>& 
 }
 
 template <typename T>
-void GenericFilter<T>::resetFilter() noexcept
+void TVGenericFilter<T>::resetFilter() noexcept
 {
     m_filteredData.setZero(m_aCoeff.size());
     m_rawData.setZero(m_bCoeff.size());

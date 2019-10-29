@@ -30,7 +30,6 @@
 #include "gsl/gsl_assert.h"
 #include "type_checks.h"
 #include "typedefs.h"
-#include <stddef.h>
 #include <string>
 
 namespace difi {
@@ -58,7 +57,7 @@ public:
     void resetFilter() noexcept { derived().resetFilter(); };
 
     /*!< \brief Return the filter type */
-    FilterType type() const noexcept { return (m_center == 0 ? Type::Forward : Type::Centered); }
+    FilterType type() const noexcept { return (m_center == 0 ? FilterType::Forward : FilterType::Centered); }
     /*! \brief Get digital filter coefficients.
      * 
      * It will automatically resize the given vectors.
@@ -101,7 +100,7 @@ protected:
      * \param bCoeff Numerator coefficients of the filter.
      * \return True if the filter status is set on READY.
      */
-    bool checkCoeffs(const vectX_t<T>& aCoeff, const vectX_t<T>& bCoeff, Type type);
+    bool checkCoeffs(const vectX_t<T>& aCoeff, const vectX_t<T>& bCoeff, FilterType type);
 
 private:
     /*! \brief Default uninitialized constructor. */

@@ -31,20 +31,20 @@ namespace difi {
 
 // Public functions
 
-template <typename T>
-void BaseFilter<T>::setType(Type type)
+template <typename T, typename Derived>
+void BaseFilter<T, Derived>::setType(FilterType type)
 {
-    Expects(type == Type::Centered ? m_bCoeff.size() > 2 && m_bCoeff.size() % 2 == 1 : true);
-    m_center = (type == Type::Forward ? 0 : (m_bCoeff.size() - 1) / 2);
+    Expects(type == FilterType::Centered ? m_bCoeff.size() > 2 && m_bCoeff.size() % 2 == 1 : true);
+    m_center = (type == FilterType::Forward ? 0 : (m_bCoeff.size() - 1) / 2);
 }
 
-template <typename T>
+template <typename T, typename Derived>
 template <typename T2>
-void BaseFilter<T>::setCoeffs(T2&& aCoeff, T2&& bCoeff)
+void BaseFilter<T, Derived>::setCoeffs(T2&& aCoeff, T2&& bCoeff)
 {
     static_assert(std::is_convertible_v<T2, vectX_t<T>>, "The coefficients types should be convertible to vectX_t<T>");
 
-    Expects(checkCoeffs(aCoeff, bCoeff, (m_center == 0 ? Type::Forward : Type::Centered)));
+    Expects(checkCoeffs(aCoeff, bCoeff, (m_center == 0 ? FilterType::Forward : FilterType::Centered)));
     m_aCoeff = aCoeff;
     m_bCoeff = bCoeff;
     normalizeCoeffs();
@@ -52,8 +52,8 @@ void BaseFilter<T>::setCoeffs(T2&& aCoeff, T2&& bCoeff)
     m_isInitialized = true;
 }
 
-template <typename T>
-void BaseFilter<T>::getCoeffs(vectX_t<T>& aCoeff, vectX_t<T>& bCoeff) const noexcept
+template <typename T, typename Derived>
+void BaseFilter<T, Derived>::getCoeffs(vectX_t<T>& aCoeff, vectX_t<T>& bCoeff) const noexcept
 {
     aCoeff = m_aCoeff;
     bCoeff = m_bCoeff;
@@ -61,22 +61,22 @@ void BaseFilter<T>::getCoeffs(vectX_t<T>& aCoeff, vectX_t<T>& bCoeff) const noex
 
 // Protected functions
 
-template <typename T>
-BaseFilter<T>::BaseFilter(const vectX_t<T>& aCoeff, const vectX_t<T>& bCoeff, FilterType type)
+template <typename T, typename Derived>
+BaseFilter<T, Derived>::BaseFilter(const vectX_t<T>& aCoeff, const vectX_t<T>& bCoeff, FilterType type)
     : m_aCoeff(aCoeff)
     , m_bCoeff(bCoeff)
     , m_filteredData(aCoeff.size())
     , m_rawData(bCoeff.size())
 {
     Expects(checkCoeffs(aCoeff, bCoeff, type));
-    m_center = (type == Type::Forward ? 0 : (bCoeff.size() - 1) / 2);
+    m_center = (type == FilterType::Forward ? 0 : (bCoeff.size() - 1) / 2);
     normalizeCoeffs();
     resetFilter();
     m_isInitialized = true;
 }
 
-template <typename T>
-void BaseFilter<T>::normalizeCoeffs()
+template <typename T, typename Derived>
+void BaseFilter<T, Derived>::normalizeCoeffs()
 {
     T a0 = m_aCoeff(0);
     if (std::abs(a0 - T(1)) < std::numeric_limits<T>::epsilon())
@@ -86,10 +86,10 @@ void BaseFilter<T>::normalizeCoeffs()
     m_bCoeff /= a0;
 }
 
-template <typename T>
-bool BaseFilter<T>::checkCoeffs(const vectX_t<T>& aCoeff, const vectX_t<T>& bCoeff, FilterType type)
+template <typename T, typename Derived>
+bool BaseFilter<T, Derived>::checkCoeffs(const vectX_t<T>& aCoeff, const vectX_t<T>& bCoeff, FilterType type)
 {
-    bool centering = (type == Type::Centered ? (bCoeff.size() % 2 == 1) : true);
+    bool centering = (type == FilterType::Centered ? (bCoeff.size() % 2 == 1) : true);
     return aCoeff.size() > 0 && std::abs(aCoeff[0]) > std::numeric_limits<T>::epsilon() && bCoeff.size() > 0 && centering;
 }
 
