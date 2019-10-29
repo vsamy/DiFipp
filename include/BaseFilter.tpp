@@ -35,7 +35,7 @@ template <typename T, typename Derived>
 void BaseFilter<T, Derived>::setType(FilterType type)
 {
     Expects(type == FilterType::Centered ? m_bCoeff.size() > 2 && m_bCoeff.size() % 2 == 1 : true);
-    m_center = (type == FilterType::Forward ? 0 : (m_bCoeff.size() - 1) / 2);
+    m_center = (type == FilterType::Backward ? 0 : (m_bCoeff.size() - 1) / 2);
 }
 
 template <typename T, typename Derived>
@@ -44,7 +44,7 @@ void BaseFilter<T, Derived>::setCoeffs(T2&& aCoeff, T2&& bCoeff)
 {
     static_assert(std::is_convertible_v<T2, vectX_t<T>>, "The coefficients types should be convertible to vectX_t<T>");
 
-    Expects(checkCoeffs(aCoeff, bCoeff, (m_center == 0 ? FilterType::Forward : FilterType::Centered)));
+    Expects(checkCoeffs(aCoeff, bCoeff, (m_center == 0 ? FilterType::Backward : FilterType::Centered)));
     m_aCoeff = aCoeff;
     m_bCoeff = bCoeff;
     normalizeCoeffs();
@@ -69,7 +69,7 @@ BaseFilter<T, Derived>::BaseFilter(const vectX_t<T>& aCoeff, const vectX_t<T>& b
     , m_rawData(bCoeff.size())
 {
     Expects(checkCoeffs(aCoeff, bCoeff, type));
-    m_center = (type == FilterType::Forward ? 0 : (bCoeff.size() - 1) / 2);
+    m_center = (type == FilterType::Backward ? 0 : (bCoeff.size() - 1) / 2);
     normalizeCoeffs();
     resetFilter();
     m_isInitialized = true;

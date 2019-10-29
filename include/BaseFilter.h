@@ -57,7 +57,7 @@ public:
     void resetFilter() noexcept { derived().resetFilter(); };
 
     /*!< \brief Return the filter type */
-    FilterType type() const noexcept { return (m_center == 0 ? FilterType::Forward : FilterType::Centered); }
+    FilterType type() const noexcept { return (m_center == 0 ? FilterType::Backward : FilterType::Centered); }
     /*! \brief Get digital filter coefficients.
      * 
      * It will automatically resize the given vectors.
@@ -110,7 +110,7 @@ private:
      * \param bCoeff Numerator coefficients of the filter in decreasing order.
      * \param center 
      */
-    BaseFilter(const vectX_t<T>& aCoeff, const vectX_t<T>& bCoeff, FilterType type = FilterType::Forward);
+    BaseFilter(const vectX_t<T>& aCoeff, const vectX_t<T>& bCoeff, FilterType type = FilterType::Backward);
     /*! \brief Default destructor. */
     virtual ~BaseFilter() = default;
 

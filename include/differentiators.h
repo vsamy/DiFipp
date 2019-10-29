@@ -72,7 +72,7 @@ template <typename T> vectN_t<T, 7> GetSLNLCoeffs() { return vectN_t<T, 7>{ T(-2
 template <typename T> vectN_t<T, 9> GetSLNLCoeffs() { return vectN_t<T, 9>{ T(-86), T(142), T(193), T(126), T(0), T(-126), T(-193), T(-142), T(86) } / T(1188); }
 template <typename T> vectN_t<T, 11> GetSLNLCoeffs() { return vectN_t<T, 11>{ T(-300), T(294), T(532), T(503), T(296), T(0), T(-296), T(-503), T(-532), T(-294), T(300) } / T(5148); }
 
-// Forward Noise-Robust differentiators; http://www.holoborodko.com/pavel/wp-content/uploads/OneSidedNoiseRobustDifferentiators.pdf
+// Backward Noise-Robust differentiators; http://www.holoborodko.com/pavel/wp-content/uploads/OneSidedNoiseRobustDifferentiators.pdf
 template <typename T, size_t N> 
 vectN_t<T, N> GetFNRCoeffs()
 {
@@ -95,7 +95,7 @@ template <typename T> vectN_t<T, 9> GetFNRCoeffs() { return vectN_t<T, 9>{ T(1),
 template <typename T> vectN_t<T, 10> GetFNRCoeffs() { return vectN_t<T, 10>{ T(1), T(7), T(20), T(28), T(14), T(-14), T(-28), T(-20), T(-7), T(-1) } / T(256); }
 template <typename T> vectN_t<T, 11> GetFNRCoeffs() { return vectN_t<T, 11>{ T(1), T(8), T(27), T(48), T(42), T(0), T(-42), T(-48), T(-27), T(-8), T(-1) } / T(512); }
 
-// Forward Hybrid Noise-Robust differentiators; http://www.holoborodko.com/pavel/wp-content/uploads/OneSidedNoiseRobustDifferentiators.pdf
+// Backward Hybrid Noise-Robust differentiators; http://www.holoborodko.com/pavel/wp-content/uploads/OneSidedNoiseRobustDifferentiators.pdf
 template <typename T, size_t N> vectN_t<T, N> GetFHNRCoeffs();
 template <typename T> vectN_t<T, 4> GetFHNRCoeffs() { return vectN_t<T, 4>{ T(2), T(-1), T(-2), T(1) } / T(2); }
 template <typename T> vectN_t<T, 5> GetFHNRCoeffs() { return vectN_t<T, 5>{ T(7), T(1), T(-10), T(-1), T(3) } / T(10); }
@@ -114,9 +114,9 @@ template <typename T, size_t N, template<class, class> typename Foo> vectN_t<T, 
         v(k) = k * v0(k);
     return v(k);
 }
-// Forward Noise-Robust differentiators for irregular space data
+// Backward Noise-Robust differentiators for irregular space data
 template <typename T, size_t N> vectN_t<T, N> GetFNRISDCoeffs() { return GetForwardISDCoeffs<T, N, GetFNRCoeffs>(); }
-// Forward Hybrid Noise-Robust differentiators for irregular space data
+// Backward Hybrid Noise-Robust differentiators for irregular space data
 template <typename T, size_t N> vectN_t<T, N> GetFHNRISDCoeffs() { return GetForwardISDCoeffs<T, N, GetFHNRCoeffs>(); }
 
 // Centered Noise-Robust differentiators (tangency at 2nd order): http://www.holoborodko.com/pavel/numerical-methods/numerical-derivative/smooth-low-noise-differentiators/
@@ -197,7 +197,7 @@ vectN_t<T, N> GetSOCNRCoeffs()
     return v;
 }
 
-// Second-Order Forward Noise-Robust differentiator: http://www.holoborodko.com/pavel/downloads/NoiseRobustSecondDerivative.pdf
+// Second-Order Backward Noise-Robust differentiator: http://www.holoborodko.com/pavel/downloads/NoiseRobustSecondDerivative.pdf
 template <typename T, size_t N>
 vectN_t<T, N> GetSOFNRCoeffs() { return GetSOCNRCoeffs<T, N>(); } // Coefficients are the same.
 
@@ -223,7 +223,7 @@ vectN_t<T, N> GetSOCNRISDCoeffs()
     return v;
 }
 
-// Second-Order Forward Noise-Robust Irregular Space Data differentiator: http://www.holoborodko.com/pavel/downloads/NoiseRobustSecondDerivative.pdf
+// Second-Order Backward Noise-Robust Irregular Space Data differentiator: http://www.holoborodko.com/pavel/downloads/NoiseRobustSecondDerivative.pdf
 template <typename T, size_t N> 
 vectN_t<T, N> GetSOFNRISDCoeffs() { return GetSOCNRISDCoeffs<T, N>(); } // Same coefficients
 
@@ -279,10 +279,10 @@ public:
 
 } // namespace details
 
-// Forward differentiators
+// Backward differentiators
 template <typename T, size_t N> using ForwardNoiseRobustDiff = ForwardDifferentiator<T, N, 1, details::GetFNRCoeffs>;
 template <typename T, size_t N> using ForwardHybridNoiseRobustDiff = ForwardDifferentiator<T, N, 1, details::GetFHNRCoeffs>;
-// Time-Varying forward differentiators
+// Time-Varying backward differentiators
 template <typename T, size_t N> using TVForwardNoiseRobustDiff = TVForwardDifferentiator<T, N, 1, details::GetFNRISDCoeffs>;
 template <typename T, size_t N> using TVForwardHybridNoiseRobustDiff = TVForwardDifferentiator<T, N, 1, details::GetFHNRISDCoeffs>;
 
@@ -297,14 +297,14 @@ template <typename T, size_t N> using TVCenteredNoiseRobust2Diff = TVCentralDiff
 template <typename T, size_t N> using TVCenteredNoiseRobust4Diff = TVCentralDifferentiator<T, N, 1, details::GetCNR4ISDCoeffs>;
 
 
-// Second-order forward differentiators
+// Second-order backward differentiators
 template <typename T, size_t N> using ForwardSecondOrderDiff = ForwardDifferentiator<T, N, 2, details::GetSOFNRCoeffs>;
-// Second-order Time-Varying forward differentiators
+// Second-order Time-Varying backward differentiators
 template <typename T, size_t N> using TVForwardSecondOrderDiff = TVForwardDifferentiator<T, N, 2, details::GetSOFNRISDCoeffs>;
 
 // Second-order central differentiators
 template <typename T, size_t N> using CenteredSecondOrderDiff = CentralDifferentiator<T, N, 2, details::GetSOCNRCoeffs>;
-// Second-order Time-Varying forward differentiators
+// Second-order Time-Varying backward differentiators
 template <typename T, size_t N> using TVCenteredSecondOrderDiff = TVCentralDifferentiator<T, N, 2, details::GetSOCNRISDCoeffs>;
 
 
