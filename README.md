@@ -7,10 +7,14 @@ DiFi++ is a small c++ header-only library  for **DI**gital **FI**lters based on 
 
 The implementation is based on well written article from Neil Robertson.
 Please check out the followings
- * https://www.dsprelated.com/showarticle/1119.php
- * https://www.dsprelated.com/showarticle/1135.php
- * https://www.dsprelated.com/showarticle/1128.php
- * https://www.dsprelated.com/showarticle/1131.php
+
+* [Butterworth filter](https://www.dsprelated.com/showarticle/1119.php)
+
+* [Highpass filters](https://www.dsprelated.com/showarticle/1135.php)
+
+* [Bandpass filters](https://www.dsprelated.com/showarticle/1128.php)
+
+* [Band-reject filters](https://www.dsprelated.com/showarticle/1131.php)
 
 The library has been tested against Matlab results.
 
@@ -30,6 +34,12 @@ cmake ..
 make install
 ```
 
+Testing
+-----
+
+To test you need to install [catch2](https://github.com/catchorg/Catch2) on your system.
+
 Note
 -----
+
 The method used is close but somewhat different from Matlab methods and Butterworth band-reject has quite different results (precision of 1e-8).
