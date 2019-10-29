@@ -44,7 +44,7 @@ template <typename T>
 using vectXc_t = vectX_t<std::complex<T>>; /*!< Eigen complex column-vector */
 
 enum class FilterType {
-    Forward,
+    Backward,
     Centered
 };
 

@@ -53,7 +53,7 @@ public:
 
 protected:
     GenericFilter() = default;
-    GenericFilter(const vectX_t<T>& aCoeff, const vectX_t<T>& bCoeff, FilterType type = FilterType::Forward)
+    GenericFilter(const vectX_t<T>& aCoeff, const vectX_t<T>& bCoeff, FilterType type = FilterType::Backward)
         : BaseFilter(aCoeff, bCoeff, type)
     {}
 };
@@ -80,7 +80,7 @@ public:
 
 protected:
     TVGenericFilter() = default;
-    TVGenericFilter(int order, const vectX_t<T>& aCoeff, const vectX_t<T>& bCoeff, FilterType type = FilterType::Forward)
+    TVGenericFilter(int order, const vectX_t<T>& aCoeff, const vectX_t<T>& bCoeff, FilterType type = FilterType::Backward)
         : BaseFilter(aCoeff, bCoeff, type)
         , m_order(order)
     {
