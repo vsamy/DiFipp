@@ -25,12 +25,10 @@
 // of the authors and should not be interpreted as representing official policies,
 // either expressed or implied, of the FreeBSD Project.
 
-#define BOOST_TEST_MODULE DigitalFilterTests
-
 #include "difi"
 #include "test_functions.h"
 #include "warning_macro.h"
-#include <boost/test/unit_test.hpp>
+#include "catch2/catch.hpp"
 
 DISABLE_CONVERSION_WARNING_BEGIN
 
@@ -44,16 +42,10 @@ struct System {
 
 DISABLE_CONVERSION_WARNING_END
 
-BOOST_FIXTURE_TEST_CASE(DIGITAL_FILTER_FLOAT, System<float>)
+TEMPLATE_TEST_CASE_METHOD(System, "Digital filter", "[df]", float, double)
 {
-    auto df = difi::DigitalFilterf(aCoeff, bCoeff);
-    test_coeffs(aCoeff, bCoeff, df, std::numeric_limits<float>::epsilon() * 10);
-    test_results(results, data, df, std::numeric_limits<float>::epsilon() * 10);
-}
-
-BOOST_FIXTURE_TEST_CASE(DIGITAL_FILTER_DOUBLE, System<double>)
-{
-    auto df = difi::DigitalFilterd(aCoeff, bCoeff);
-    test_coeffs(aCoeff, bCoeff, df, std::numeric_limits<double>::epsilon() * 10);
-    test_results(results, data, df, std::numeric_limits<double>::epsilon() * 10);
+    System<TestType> s;
+    auto df = difi::DigitalFilter<TestType>(aCoeff, bCoeff);
+    test_coeffs(s.aCoeff, s.bCoeff, s.df, std::numeric_limits<TestType>::epsilon() * 10);
+    test_results(s.results, s.data, s.df, std::numeric_limits<TestType>::epsilon() * 10);
 }

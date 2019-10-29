@@ -25,11 +25,9 @@
 // of the authors and should not be interpreted as representing official policies,
 // either expressed or implied, of the FreeBSD Project.
 
-#define BOOST_TEST_MODULE polynome_functions_tests
-
 #include "difi"
 #include "warning_macro.h"
-#include <boost/test/unit_test.hpp>
+#include <catch2/catch.hpp>
 #include <limits>
 
 using c_int_t = std::complex<int>;
@@ -62,50 +60,36 @@ struct SystemCFloat {
 
 DISABLE_CONVERSION_WARNING_END
 
-BOOST_FIXTURE_TEST_CASE(POLYNOME_FUNCTION_INT, SystemInt)
+TEST_CASE_METHOD(SystemInt, "Polynome function for int", "[poly]")
 {
-    auto res = difi::VietaAlgoi::polyCoeffFromRoot(data);
-
+    SystemInt s;
+    auto res = difi::VietaAlgoi::polyCoeffFromRoot(s.data);
     for (Eigen::Index i = 0; i < res.size(); ++i)
-        BOOST_REQUIRE_EQUAL(res(i), results(i));
+        REQUIRE_EQUAL(res(i), s.results(i));
 }
 
-BOOST_FIXTURE_TEST_CASE(POLYNOME_FUNCTION_FLOAT, SystemFloat<float>)
+TEMPLATE_TEST_CASE_METHOD(SystemFloat, "Polynome function for floating point", "[poly]", float, double)
 {
-    auto res = difi::VietaAlgof::polyCoeffFromRoot(data);
+    SystemFloat<TestType> s;
+    auto res = difi::VietaAlgo<TestType>::polyCoeffFromRoot(s.data);
 
     for (Eigen::Index i = 0; i < res.size(); ++i)
-        BOOST_REQUIRE_SMALL(std::abs(res(i) - results(i)), std::numeric_limits<float>::epsilon() * 1000);
+        BOOST_REQUIRE_SMALL(std::abs(res(i) - s.results(i)), std::numeric_limits<TestType>::epsilon() * 1000);
 }
 
-BOOST_FIXTURE_TEST_CASE(POLYNOME_FUNCTION_DOUBLE, SystemFloat<double>)
+TEST_CASE_METHOD(SystemCInt, "Polynome function for complex int", "[poly]")
 {
-    auto res = difi::VietaAlgod::polyCoeffFromRoot(data);
-
+    SystemCInt s;
+    auto res = difi::VietaAlgoci::polyCoeffFromRoot(s.data);
     for (Eigen::Index i = 0; i < res.size(); ++i)
-        BOOST_REQUIRE_SMALL(std::abs(res(i) - results(i)), std::numeric_limits<double>::epsilon() * 1000);
+        REQUIRE_EQUAL(res(i), s.results(i));
 }
 
-BOOST_FIXTURE_TEST_CASE(POLYNOME_FUNCTION_CINT, SystemCInt)
+TEMPLATE_TEST_CASE_METHOD(SystemFloat, "Polynome function for floating point", "[poly]", float, double)
 {
-    auto res = difi::VietaAlgoci::polyCoeffFromRoot(data);
+    SystemCFloat<TestType> s;
+    auto res = difi::VietaAlgo<std::complex<TestType>>::polyCoeffFromRoot(s.data);
 
     for (Eigen::Index i = 0; i < res.size(); ++i)
-        BOOST_REQUIRE_EQUAL(res(i), results(i));
-}
-
-BOOST_FIXTURE_TEST_CASE(POLYNOME_FUNCTION_CFLOAT, SystemCFloat<float>)
-{
-    auto res = difi::VietaAlgocf::polyCoeffFromRoot(data);
-
-    for (Eigen::Index i = 0; i < res.size(); ++i)
-        BOOST_REQUIRE_SMALL(std::abs(res(i) - results(i)), std::numeric_limits<float>::epsilon() * 1000);
-}
-
-BOOST_FIXTURE_TEST_CASE(POLYNOME_FUNCTION_CDOUBLE, SystemCFloat<double>)
-{
-    auto res = difi::VietaAlgocd::polyCoeffFromRoot(data);
-
-    for (Eigen::Index i = 0; i < res.size(); ++i)
-        BOOST_REQUIRE_SMALL(std::abs(res(i) - results(i)), std::numeric_limits<double>::epsilon() * 1000);
+        REQUIRE_SMALL(std::abs(res(i) - s.results(i)), std::numeric_limits<TestType>::epsilon() * 1000);
 }

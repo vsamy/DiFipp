@@ -25,35 +25,33 @@
 // of the authors and should not be interpreted as representing official policies,
 // either expressed or implied, of the FreeBSD Project.
 
-#define BOOST_TEST_MODULE GenericFilterTests
-
 #include "difi"
-#include <boost/test/unit_test.hpp>
 #include <exception>
 #include <vector>
+#include <catch2/catch.hpp>
 
-BOOST_AUTO_TEST_CASE(FILTER_FAILURES)
+TEST_CASE("Filter failures", "[fail]")
 {
     // A coeff are missing
-    BOOST_REQUIRE_THROW(difi::DigitalFilterd(Eigen::VectorXd(), Eigen::VectorXd::Constant(2, 0)), std::logic_error);
+    REQUIRE_THROW_AS(difi::DigitalFilterd(Eigen::VectorXd(), Eigen::VectorXd::Constant(2, 0)), std::logic_error);
     // B coeff are missing
-    BOOST_REQUIRE_THROW(difi::DigitalFilterd(Eigen::VectorXd::Constant(2, 1), Eigen::VectorXd()), std::logic_error);
+    REQUIRE_THROW_AS(difi::DigitalFilterd(Eigen::VectorXd::Constant(2, 1), Eigen::VectorXd()), std::logic_error);
     // aCoeff(0) = 0
-    BOOST_REQUIRE_THROW(difi::DigitalFilterd(Eigen::VectorXd::Constant(2, 0), Eigen::VectorXd::Constant(2, 0)), std::logic_error);
+    REQUIRE_THROW_AS(difi::DigitalFilterd(Eigen::VectorXd::Constant(2, 0), Eigen::VectorXd::Constant(2, 0)), std::logic_error);
     // Filter left uninitialized
-    BOOST_REQUIRE_NO_THROW(difi::DigitalFilterd());
+    REQUIRE_NOTHROW(difi::DigitalFilterd());
     auto df = difi::DigitalFilterd();
     // Filter data with uninitialized filter
-    BOOST_REQUIRE_THROW(df.stepFilter(10.), std::logic_error);
+    REQUIRE_THROW_AS(df.stepFilter(10.), std::logic_error);
     // window <= 0
-    BOOST_REQUIRE_THROW(difi::MovingAveraged(0), std::logic_error);
+    REQUIRE_THROW_AS(difi::MovingAveraged(0), std::logic_error);
     // order <= 0
-    BOOST_REQUIRE_THROW(difi::Butterworthd(0, 10, 100), std::logic_error);
+    REQUIRE_THROW_AS(difi::Butterworthd(0, 10, 100), std::logic_error);
     // fc > 2*fs
-    BOOST_REQUIRE_THROW(difi::Butterworthd(2, 60, 100), std::logic_error);
+    REQUIRE_THROW_AS(difi::Butterworthd(2, 60, 100), std::logic_error);
     // Upper frequency < lower frequency
-    BOOST_REQUIRE_THROW(difi::Butterworthd(2, 6, 5, 100), std::logic_error);
+    REQUIRE_THROW_AS(difi::Butterworthd(2, 6, 5, 100), std::logic_error);
 
     // Ok
-    BOOST_REQUIRE_NO_THROW(difi::DigitalFilterd(Eigen::VectorXd::Constant(2, 1), Eigen::VectorXd::Constant(2, 0)));
+    REQUIRE_NOTHROW(difi::DigitalFilterd(Eigen::VectorXd::Constant(2, 1), Eigen::VectorXd::Constant(2, 0)));
 }

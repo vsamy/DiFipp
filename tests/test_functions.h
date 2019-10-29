@@ -28,20 +28,21 @@
 #pragma once
 
 #include "difi"
-#include <boost/test/unit_test.hpp>
+#include <Catch2/catch.hpp>
+#include "catch_helper.h"
 #include <limits>
 
 template <typename T>
 void test_coeffs(const difi::vectX_t<T>& aCoeff, const difi::vectX_t<T>& bCoeff, const difi::GenericFilter<T>& filter, T prec)
 {
-    BOOST_REQUIRE_EQUAL(aCoeff.size(), filter.aOrder());
-    BOOST_REQUIRE_EQUAL(bCoeff.size(), filter.bOrder());
+    REQUIRE_EQUAL(aCoeff.size(), filter.aOrder());
+    REQUIRE_EQUAL(bCoeff.size(), filter.bOrder());
     difi::vectX_t<T> faCoeff, fbCoeff;
     filter.getCoeffs(faCoeff, fbCoeff);
     for (Eigen::Index i = 0; i < faCoeff.size(); ++i)
-        BOOST_REQUIRE_SMALL(std::abs(aCoeff(i) - faCoeff(i)), prec);
+        REQUIRE_SMALL(std::abs(aCoeff(i) - faCoeff(i)), prec);
     for (Eigen::Index i = 0; i < fbCoeff.size(); ++i)
-        BOOST_REQUIRE_SMALL(std::abs(bCoeff(i) - fbCoeff(i)), prec);
+        REQUIRE_SMALL(std::abs(bCoeff(i) - fbCoeff(i)), prec);
 }
 
 template <typename T>
@@ -53,10 +54,10 @@ void test_results(const difi::vectX_t<T>& results, const difi::vectX_t<T>& data,
         filteredData(i) = filter.stepFilter(data(i));
 
     for (Eigen::Index i = 0; i < filteredData.size(); ++i)
-        BOOST_REQUIRE_SMALL(std::abs(filteredData(i) - results(i)), prec);
+        REQUIRE_SMALL(std::abs(filteredData(i) - results(i)), prec);
 
     filter.resetFilter();
     filteredData = filter.filter(data);
     for (Eigen::Index i = 0; i < filteredData.size(); ++i)
-        BOOST_REQUIRE_SMALL(std::abs(filteredData(i) - results(i)), prec);
+        REQUIRE_SMALL(std::abs(filteredData(i) - results(i)), prec);
 }

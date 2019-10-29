@@ -25,11 +25,9 @@
 // of the authors and should not be interpreted as representing official policies,
 // either expressed or implied, of the FreeBSD Project.
 
-#define BOOST_TEST_MODULE MovingAverageFilterTests
-
 #include "difi"
 #include "test_functions.h"
-#include <boost/test/unit_test.hpp>
+#include <catch2/catch.hpp>
 
 template <typename T>
 struct System {
@@ -38,14 +36,9 @@ struct System {
     difi::vectX_t<T> results = (difi::vectX_t<T>(6) << 0.25, 0.75, 1.5, 2.5, 3.5, 4.5).finished();
 };
 
-BOOST_FIXTURE_TEST_CASE(MOVING_AVERAGE_FLOAT, System<float>)
+TEMPLATE_TEST_CASE_METHOD(System, "Moving average filter", "[maf]", float, double)
 {
-    auto maf = difi::MovingAveragef(windowSize);
-    test_results(results, data, maf, std::numeric_limits<float>::epsilon() * 10);
-}
-
-BOOST_FIXTURE_TEST_CASE(MOVING_AVERAGE_DOUBLE, System<double>)
-{
-    auto maf = difi::MovingAveraged(windowSize);
-    test_results(results, data, maf, std::numeric_limits<double>::epsilon() * 10);
+    System<TestType> s;
+    auto maf = difi::MovingAverage<TestType>(aCoeff, bCoeff);
+    test_results(s.results, s.data, maf, std::numeric_limits<TestType>::epsilon() * 10);
 }
