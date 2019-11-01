@@ -27,6 +27,7 @@
 
 #include "difi"
 #include "warning_macro.h"
+#include "catch_helper.h"
 #include <catch2/catch.hpp>
 #include <limits>
 
@@ -74,7 +75,7 @@ TEMPLATE_TEST_CASE_METHOD(SystemFloat, "Polynome function for floating point", "
     auto res = difi::VietaAlgo<TestType>::polyCoeffFromRoot(s.data);
 
     for (Eigen::Index i = 0; i < res.size(); ++i)
-        BOOST_REQUIRE_SMALL(std::abs(res(i) - s.results(i)), std::numeric_limits<TestType>::epsilon() * 1000);
+        REQUIRE_SMALL(std::abs(res(i) - s.results(i)), std::numeric_limits<TestType>::epsilon() * 1000);
 }
 
 TEST_CASE_METHOD(SystemCInt, "Polynome function for complex int", "[poly]")
@@ -85,7 +86,7 @@ TEST_CASE_METHOD(SystemCInt, "Polynome function for complex int", "[poly]")
         REQUIRE_EQUAL(res(i), s.results(i));
 }
 
-TEMPLATE_TEST_CASE_METHOD(SystemFloat, "Polynome function for floating point", "[poly]", float, double)
+TEMPLATE_TEST_CASE_METHOD(SystemFloat, "Polynome function for complex floating point", "[poly]", float, double)
 {
     SystemCFloat<TestType> s;
     auto res = difi::VietaAlgo<std::complex<TestType>>::polyCoeffFromRoot(s.data);

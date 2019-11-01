@@ -46,6 +46,6 @@ TEMPLATE_TEST_CASE_METHOD(System, "Digital filter", "[df]", float, double)
 {
     System<TestType> s;
     auto df = difi::DigitalFilter<TestType>(aCoeff, bCoeff);
-    test_coeffs(s.aCoeff, s.bCoeff, s.df, std::numeric_limits<TestType>::epsilon() * 10);
-    test_results(s.results, s.data, s.df, std::numeric_limits<TestType>::epsilon() * 10);
+    test_coeffs(s.aCoeff, s.bCoeff, df, std::numeric_limits<TestType>::epsilon() * 10);
+    test_results(s.results, s.data, df, std::numeric_limits<TestType>::epsilon() * 10);
 }

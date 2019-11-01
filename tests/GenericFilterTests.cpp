@@ -33,24 +33,24 @@
 TEST_CASE("Filter failures", "[fail]")
 {
     // A coeff are missing
-    REQUIRE_THROW_AS(difi::DigitalFilterd(Eigen::VectorXd(), Eigen::VectorXd::Constant(2, 0)), std::logic_error);
+    REQUIRE_THROWS_AS(difi::DigitalFilterd(Eigen::VectorXd(), Eigen::VectorXd::Constant(2, 0)), std::logic_error);
     // B coeff are missing
-    REQUIRE_THROW_AS(difi::DigitalFilterd(Eigen::VectorXd::Constant(2, 1), Eigen::VectorXd()), std::logic_error);
+    REQUIRE_THROWS_AS(difi::DigitalFilterd(Eigen::VectorXd::Constant(2, 1), Eigen::VectorXd()), std::logic_error);
     // aCoeff(0) = 0
-    REQUIRE_THROW_AS(difi::DigitalFilterd(Eigen::VectorXd::Constant(2, 0), Eigen::VectorXd::Constant(2, 0)), std::logic_error);
+    REQUIRE_THROWS_AS(difi::DigitalFilterd(Eigen::VectorXd::Constant(2, 0), Eigen::VectorXd::Constant(2, 0)), std::logic_error);
     // Filter left uninitialized
     REQUIRE_NOTHROW(difi::DigitalFilterd());
     auto df = difi::DigitalFilterd();
     // Filter data with uninitialized filter
-    REQUIRE_THROW_AS(df.stepFilter(10.), std::logic_error);
+    REQUIRE_THROWS_AS(df.stepFilter(10.), std::logic_error);
     // window <= 0
-    REQUIRE_THROW_AS(difi::MovingAveraged(0), std::logic_error);
+    REQUIRE_THROWS_AS(difi::MovingAveraged(0), std::logic_error);
     // order <= 0
-    REQUIRE_THROW_AS(difi::Butterworthd(0, 10, 100), std::logic_error);
+    REQUIRE_THROWS_AS(difi::Butterworthd(0, 10, 100), std::logic_error);
     // fc > 2*fs
-    REQUIRE_THROW_AS(difi::Butterworthd(2, 60, 100), std::logic_error);
+    REQUIRE_THROWS_AS(difi::Butterworthd(2, 60, 100), std::logic_error);
     // Upper frequency < lower frequency
-    REQUIRE_THROW_AS(difi::Butterworthd(2, 6, 5, 100), std::logic_error);
+    REQUIRE_THROWS_AS(difi::Butterworthd(2, 6, 5, 100), std::logic_error);
 
     // Ok
     REQUIRE_NOTHROW(difi::DigitalFilterd(Eigen::VectorXd::Constant(2, 1), Eigen::VectorXd::Constant(2, 0)));

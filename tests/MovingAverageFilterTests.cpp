@@ -39,6 +39,6 @@ struct System {
 TEMPLATE_TEST_CASE_METHOD(System, "Moving average filter", "[maf]", float, double)
 {
     System<TestType> s;
-    auto maf = difi::MovingAverage<TestType>(aCoeff, bCoeff);
+    auto maf = difi::MovingAverage<TestType>(s.windowSize);
     test_results(s.results, s.data, maf, std::numeric_limits<TestType>::epsilon() * 10);
 }

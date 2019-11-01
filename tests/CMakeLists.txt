@@ -31,10 +31,9 @@ find_package(Catch2 REQUIRED)
 
 macro(addTest testName)
     add_executable(${testName} ${testName}.cpp)
-    # target_link_libraries(${testName} PRIVATE Boost::unit_test_framework Boost::disable_autolinking ${BOOST_DEFS} ${PROJECT_NAME})
     target_link_libraries(${testName} PRIVATE Catch2::Catch2)
     target_compile_definitions(${testName} PRIVATE CATCH_CONFIG_MAIN)
-    target_include_directories(${testName} SYSTEM INTERFACE "${EIGEN3_INCLUDE_DIR}") 
+    target_include_directories(${testName} SYSTEM PUBLIC "${EIGEN3_INCLUDE_DIR}") 
     # Adding a project configuration file (for MSVC only)
     generate_msvc_dot_user_file(${testName})
 

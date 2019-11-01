@@ -81,8 +81,8 @@ TEMPLATE_TEST_CASE_METHOD(System, "Butterworth low pass filter", "[lp]", float, 
     System<TestType> s;
     auto bf = difi::Butterworth<TestType>(s.order, s.fc, s.fs);
     REQUIRE_EQUAL(bf.aOrder(), bf.bOrder());
-    test_coeffs(s.lpACoeffRes, s.lpBCoeffRes, s.bf, std::numeric_limits<TestType>::epsilon() * 10);
-    test_results(s.lpResults, s.data, s.bf, std::numeric_limits<TestType>::epsilon() * 100);
+    test_coeffs(s.lpACoeffRes, s.lpBCoeffRes, bf, std::numeric_limits<TestType>::epsilon() * 10);
+    test_results(s.lpResults, s.data, bf, std::numeric_limits<TestType>::epsilon() * 100);
 }
 
 TEMPLATE_TEST_CASE_METHOD(System, "Butterworth high pass filter", "[hp]", float, double)
@@ -90,8 +90,8 @@ TEMPLATE_TEST_CASE_METHOD(System, "Butterworth high pass filter", "[hp]", float,
     System<TestType> s;
     auto bf = difi::Butterworth<TestType>(s.order, s.fc, s.fs, difi::Butterworth<TestType>::Type::HighPass);
     REQUIRE_EQUAL(bf.aOrder(), bf.bOrder());
-    test_coeffs(s.hpACoeffRes, s.hpBCoeffRes, s.bf, std::numeric_limits<TestType>::epsilon() * 10);
-    test_results(s.hpResults, s.data, s.bf, std::numeric_limits<TestType>::epsilon() * 1000);
+    test_coeffs(s.hpACoeffRes, s.hpBCoeffRes, bf, std::numeric_limits<TestType>::epsilon() * 10);
+    test_results(s.hpResults, s.data, bf, std::numeric_limits<TestType>::epsilon() * 1000);
 }
 
 TEMPLATE_TEST_CASE_METHOD(System, "Butterworth band pass filter", "[bp]", float, double)
@@ -99,8 +99,8 @@ TEMPLATE_TEST_CASE_METHOD(System, "Butterworth band pass filter", "[bp]", float,
     System<TestType> s;
     auto bf = difi::Butterworth<TestType>(s.order, s.fLower, s.fUpper, s.fs);
     REQUIRE_EQUAL(bf.aOrder(), bf.bOrder());
-    test_coeffs(s.bpACoeffRes, s.bpBCoeffRes, s.bf, std::numeric_limits<TestType>::epsilon() * 1000);
-    test_results(s.bpResults, s.data, s.bf, std::numeric_limits<TestType>::epsilon() * 10000);
+    test_coeffs(s.bpACoeffRes, s.bpBCoeffRes, bf, std::numeric_limits<TestType>::epsilon() * 1000);
+    test_results(s.bpResults, s.data, bf, std::numeric_limits<TestType>::epsilon() * 10000);
 }
 
 TEMPLATE_TEST_CASE_METHOD(System, "Butterworth band-reject filter", "[br]", float, double)
@@ -108,6 +108,6 @@ TEMPLATE_TEST_CASE_METHOD(System, "Butterworth band-reject filter", "[br]", floa
     System<TestType> s;
     auto bf = difi::Butterworth<TestType>(s.order, s.fLower, s.fUpper, s.fs, difi::Butterworth<TestType>::Type::BandReject);
     REQUIRE_EQUAL(bf.aOrder(), bf.bOrder());
-    test_coeffs(s.brACoeffRes, s.brBCoeffRes, s.bf, std::numeric_limits<TestType>::epsilon() * 1e8);
-    test_results(s.brResults, s.data, s.bf, std::numeric_limits<TestType>::epsilon() * 1e8);
+    test_coeffs(s.brACoeffRes, s.brBCoeffRes, bf, std::numeric_limits<TestType>::epsilon() * TestType(1e8));
+    test_results(s.brResults, s.data, bf, std::numeric_limits<TestType>::epsilon() * TestType(1e8));
 }
