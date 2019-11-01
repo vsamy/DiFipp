@@ -80,7 +80,7 @@ T TVGenericFilter<T>::stepFilter(const T& data, const T& time)
             m_timeDiffs(i) = m_timeDiffs(i - 1);
         m_timeDiffs(0) = std::pow(time - m_timers(1), m_order);
     } else {
-        const Eigen::Index S = data.size() - 1;
+        const Eigen::Index S = m_rawData.size() - 1;
         const Eigen::Index M = S / 2;
         m_timeDiffs(M) = T(1);
         for (Eigen::Index i = 1; i < M; ++i) {

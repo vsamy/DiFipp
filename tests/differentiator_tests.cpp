@@ -25,27 +25,11 @@
 // of the authors and should not be interpreted as representing official policies,
 // either expressed or implied, of the FreeBSD Project.
 
-#include "difi"
-#include "test_functions.h"
-#include "warning_macro.h"
+#pragma once
+#include "differentiators.h"
 #include <catch2/catch.hpp>
 
-DISABLE_CONVERSION_WARNING_BEGIN
-
-template <typename T>
-struct System {
-    difi::vectX_t<T> data = (difi::vectX_t<T>(4) << 1, 2, 3, 4).finished();
-    difi::vectX_t<T> aCoeff = (difi::vectX_t<T>(2) << 1, -0.99993717).finished();
-    difi::vectX_t<T> bCoeff = (difi::vectX_t<T>(2) << 0.99996859, -0.99996859).finished();
-    difi::vectX_t<T> results = (difi::vectX_t<T>(4) << 0.99996859, 1.999874351973491, 2.999717289867956, 3.999497407630634).finished();
-};
-
-DISABLE_CONVERSION_WARNING_END
-
-TEMPLATE_TEST_CASE_METHOD(System, "Digital filter", "[df]", float, double)
+TEMPLATE_TEST_CASE("Sinus central derivative", "[sin][dentral]", float, double)
 {
-    System<TestType> s;
-    auto df = difi::DigitalFilter<TestType>(aCoeff, bCoeff);
-    test_coeffs(s.aCoeff, s.bCoeff, df, std::numeric_limits<TestType>::epsilon() * 10);
-    test_results(s.results, s.data, df, std::numeric_limits<TestType>::epsilon() * 10);
+    
 }
