@@ -134,9 +134,9 @@ vectN_t<T, N> operator()() const
 
 // Centered Noise-Robust  differentiators (tangency at 4th order): http://www.holoborodko.com/pavel/numerical-methods/numerical-derivative/smooth-low-noise-differentiators/
 template <typename T, size_t N> struct GetCNR4Coeffs { vectN_t<T, N> operator()() const; };
-template <typename T> struct GetCNR4Coeffs<T, 3> { vectN_t<T, 3> operator()() const { return vectN_t<T, 3>{ T(-5), T(12), T(39), T(0), T(-39), T(-12), T(5) } / T(96); } };
-template <typename T> struct GetCNR4Coeffs<T, 4> { vectN_t<T, 4> operator()() const { return vectN_t<T, 4>{ T(-2), T(-1), T(16), T(27) } / T(96); } };
-template <typename T> struct GetCNR4Coeffs<T, 5> { vectN_t<T, 5> operator()() const { return vectN_t<T, 5>{ T(-11), T(-32), T(39), T(256), T(322) } / T(1536); } };
+template <typename T> struct GetCNR4Coeffs<T, 7> { vectN_t<T, 7> operator()() const { return vectN_t<T, 7>{ T(-5), T(12), T(39), T(0), T(-39), T(-12), T(5) } / T(96); } };
+template <typename T> struct GetCNR4Coeffs<T, 9> { vectN_t<T, 9> operator()() const { return vectN_t<T, 9>{ T(-2), T(-1), T(16), T(27), T(0), T(-27), T(-16), T(1), T(2) } / T(96); } };
+template <typename T> struct GetCNR4Coeffs<T, 11> { vectN_t<T, 11> operator()() const { return vectN_t<T, 11>{ T(-11), T(-32), T(39), T(256), T(322), T(0), T(-322), T(-256), T(-39), T(32), T(11) } / T(1536); } };
 
 // Centered Noise-Robust differentiators for irregular space data: http://www.holoborodko.com/pavel/numerical-methods/numerical-derivative/smooth-low-noise-differentiators/
 template <typename T, size_t N, typename CNRCoeffs> vectN_t<T, N> GetCNRISDCoeffs()

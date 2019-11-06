@@ -36,7 +36,7 @@ template <typename T>
 using FunctionGenerator = std::tuple<difi::vectX_t<T>, difi::vectX_t<T>, difi::vectX_t<T>>;
 
 template <typename T>
-FunctionGenerator sinGenerator(int nrSteps, T omega, T dt = 0.001)
+FunctionGenerator<T> sinGenerator(int nrSteps, T frequency, T dt = 0.001)
 {
     using namespace difi;
 
@@ -49,21 +49,21 @@ FunctionGenerator sinGenerator(int nrSteps, T omega, T dt = 0.001)
 
     for (int i = 0; i < nrSteps; ++i) {
         // truth
-        truth(i) = std::sin(2 * pi<T> * omega * i * dt);
+        truth(i) = std::sin(2 * pi<T> * frequency * i * dt);
 
         // noisy
         std::normal_distribution<T> d{truth(i), T(0.01)};
         noisy(i) = truth(i) + d(gen);
 
         // derivative
-        derivative(i) = 2 * pi<T> * omega * i * std::cos(2 * pi<T> * omega * i * dt);
+        derivative(i) = 2 * pi<T> * frequency * i * std::cos(2 * pi<T> * frequency * i * dt);
     }
 
     return { truth, noisy, derivative };
 }
 
-template <Typename T>
-FunctionGenerator polyGenerator(int nrSteps, difi::VectX_t<T> coeffs, T dt = 0.001)
+template <typename T>
+FunctionGenerator<T> polyGenerator(int nrSteps, difi::vectX_t<T> coeffs, T dt = 0.001)
 {
     using namespace difi;
     Expects(coeffs.size() >=2);
