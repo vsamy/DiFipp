@@ -81,18 +81,17 @@ public:
 protected:
     TVGenericFilter() = default;
     TVGenericFilter(size_t differentialOrder, const vectX_t<T>& aCoeff, const vectX_t<T>& bCoeff, FilterType type = FilterType::Backward)
-        : BaseFilter(aCoeff, bCoeff, type)
+        : BaseFilter()
         , m_diffOrder(differentialOrder)
     {
         Expects(differentialOrder >= 1);
-        m_timers.resize(m_bCoeff.size());
-        m_timeDiffs.resize(m_bCoeff.size());
+        setCoeffs(aCoeff, bCoeff);
+        setType(type);
     }
 
 private:
     size_t m_diffOrder = 1;
     vectX_t<T> m_timers;
-    vectX_t<T> m_timeDiffs;
 };
 
 } // namespace difi

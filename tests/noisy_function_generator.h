@@ -142,7 +142,7 @@ TVFunctionGenerator<T> tvSinGenerator(int nrSteps, T amplitude, T frequency, T m
 }
 
 template <typename T, size_t N>
-TVFunctionGenerator<T> tvPolyGenerator(int nrSteps, std::array<T, N> coeffs, T dt)
+TVFunctionGenerator<T> tvPolyGenerator(int nrSteps, std::array<T, N> coeffs, T meanDt)
 {
     using namespace difi;
     static_assert(N >= 2, "N must be superior to 20");

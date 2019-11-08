@@ -160,3 +160,9 @@ TVDiffTester<T, tv_central_list<T, N>> generateTVCTester(const vectX_t<T>& t, co
 {
     return { tv_central_list<T, N>{}, t, f, df };
 }
+
+template <typename T, size_t N>
+TVDiffTester<T, std::tuple<TVCenteredSecondOrderDiff<T, N>>> generateTVC2OTester(const vectX_t<T>& t, const vectX_t<T>& f, const vectX_t<T>& df)
+{
+    return { std::tuple<TVCenteredSecondOrderDiff<T, N>>{}, t, f, df };
+}

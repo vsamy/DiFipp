@@ -191,7 +191,7 @@ template <typename T, size_t N, typename CNRCoeffs> vectN_t<T, N> GetCNRISDCoeff
     vectN_t<T, N> v{};
     const vectN_t<T, N> v0 = CNRCoeffs{}();
     v(M) = 0;
-    for (Eigen::Index k = 1; k < M; ++k) {
+    for (Eigen::Index k = 1; k < M + 1; ++k) {
         v(M - k) = T(2) * k * v0(M - k);
         v(M + k) = T(2) * k * v0(M + k);
     }
@@ -264,14 +264,16 @@ struct GetSOCNRISDCoeffs {
         constexpr const T Den = pow(size_t(2), N - 3);
 
         vectN_t<T, N> v{};
-        vectN_t<T, N> s = GetSONRBaseCoeffs<T, N>();
+        const vectN_t<T, M + 1> s = GetSONRBaseCoeffs<T, N>();
 
-        constexpr const alpha = [&s](size_t k) -> T { return T(4) * k * k * s(k) };
+        const auto alpha = [&s](size_t k) -> T { return T(4) * k * k * s(k); };
 
-        v(M) = -T(2) * alpha(0);
-        for (size_t k = 1; k < M; ++k) {
-            v(M + k) = alpha(k);
-            v(M - k) = alpha(k);
+        v(M) = T(0);
+        for (size_t k = 1; k < M + 1; ++k) {
+            auto alph = alpha(k);
+            v(M) -= T(2) * alph;
+            v(M + k) = alph;
+            v(M - k) = alph;
         }
 
         v /= Den;

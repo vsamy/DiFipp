@@ -79,67 +79,67 @@ TEST_CASE("Coefficient calculation", "[coeff]") // Some coeffs are computed, the
     checkCoeffs<11>(details::GetFNRCoeffs<double, 11>{}(), (vectN_t<double, 11>() << 1., 8., 27., 48., 42., 0., -42., -48., -27., -8., -1.).finished() / 512.);
 }
 
-// TEST_CASE("Sinus time-fixed central derivative", "[sin][central][1st]")
-// {
-//     double dt = 0.001;
-//     auto sg = sinGenerator<double>(STEPS, SIN_AMPLITUDE, SIN_FREQUENCY, dt);
-//     auto ct7 = generateCTester<double, 7>(std::get<0>(sg), std::get<1>(sg));
-//     auto ct9 = generateCTester<double, 9>(std::get<0>(sg), std::get<1>(sg));
+TEST_CASE("Sinus time-fixed central derivative", "[sin][central][1st]")
+{
+    double dt = 0.001;
+    auto sg = sinGenerator<double>(STEPS, SIN_AMPLITUDE, SIN_FREQUENCY, dt);
+    auto ct7 = generateCTester<double, 7>(std::get<0>(sg), std::get<1>(sg));
+    auto ct9 = generateCTester<double, 9>(std::get<0>(sg), std::get<1>(sg));
 
-//     ct7.setFilterTimestep(dt);
-//     ct9.setFilterTimestep(dt);
+    ct7.setFilterTimestep(dt);
+    ct9.setFilterTimestep(dt);
 
-//     std::array<double, 5> eps = { 1e-10, 1e-1, 1e-6, 1e-1, 1e-6 }; // Value checked with MATLAB
-//     ct7.run(eps);
-//     ct9.run(eps);
-// }
+    std::array<double, 5> eps = { 1e-10, 1e-1, 1e-6, 1e-1, 1e-6 }; // Value checked with MATLAB
+    ct7.run(eps);
+    ct9.run(eps);
+}
 
-// TEST_CASE("Polynome time-fixed central derivative", "[poly][central][1st]")
-// {
-//     double dt = 0.001;
-//     {
-//         auto pg4 = polyGenerator<double>(STEPS, POLY_4<double>, dt);
-//         auto ct7 = generateCTester<double, 7>(std::get<0>(pg4), std::get<1>(pg4));
-//         auto ct9 = generateCTester<double, 9>(std::get<0>(pg4), std::get<1>(pg4));
+TEST_CASE("Polynome time-fixed central derivative", "[poly][central][1st]")
+{
+    double dt = 0.001;
+    {
+        auto pg = polyGenerator<double>(STEPS, POLY_4<double>, dt);
+        auto ct7 = generateCTester<double, 7>(std::get<0>(pg), std::get<1>(pg));
+        auto ct9 = generateCTester<double, 9>(std::get<0>(pg), std::get<1>(pg));
 
-//         ct7.setFilterTimestep(dt);
-//         ct9.setFilterTimestep(dt);
+        ct7.setFilterTimestep(dt);
+        ct9.setFilterTimestep(dt);
 
-//         std::array<double, 5> eps = { 1e-12, 1e-4, 1e-12, 1e-4, 1e-12 }; // Value checked with MATLAB
-//         ct7.run(eps);
-//         ct9.run(eps);
-//     }
-//     {
-//         auto pg7 = polyGenerator<double>(STEPS, POLY_7<double>, dt);
-//         auto ct7 = generateCTester<double, 7>(std::get<0>(pg7), std::get<1>(pg7));
-//         auto ct9 = generateCTester<double, 9>(std::get<0>(pg7), std::get<1>(pg7));
+        std::array<double, 5> eps = { 1e-12, 1e-4, 1e-12, 1e-4, 1e-12 }; // Value checked with MATLAB
+        ct7.run(eps);
+        ct9.run(eps);
+    }
+    {
+        auto pg = polyGenerator<double>(STEPS, POLY_7<double>, dt);
+        auto ct7 = generateCTester<double, 7>(std::get<0>(pg), std::get<1>(pg));
+        auto ct9 = generateCTester<double, 9>(std::get<0>(pg), std::get<1>(pg));
 
-//         ct7.setFilterTimestep(dt);
-//         ct9.setFilterTimestep(dt);
+        ct7.setFilterTimestep(dt);
+        ct9.setFilterTimestep(dt);
 
-//         std::array<double, 5> eps = { 1e-11, 1e-3, 1e-9, 1e-4, 1e-9 }; // Value checked with MATLAB
-//         ct7.run(eps);
-//         ct9.run(eps);
-//     }
-// }
+        std::array<double, 5> eps = { 1e-11, 1e-3, 1e-9, 1e-4, 1e-9 }; // Value checked with MATLAB
+        ct7.run(eps);
+        ct9.run(eps);
+    }
+}
 
-// TEST_CASE("2nd order sinus time-fixed center derivative", "[sin][center][2nd]")
-// {
-//     double dt = 0.001;
-//     auto sg = sinGenerator<double>(STEPS, SIN_AMPLITUDE, SIN_FREQUENCY, dt);
-//     auto ct7 = generateC2OTester<double, 7>(std::get<0>(sg), std::get<2>(sg));
-//     auto ct9 = generateC2OTester<double, 9>(std::get<0>(sg), std::get<2>(sg));
-//     auto ct11 = generateC2OTester<double, 11>(std::get<0>(sg), std::get<2>(sg));
+TEST_CASE("2nd order sinus time-fixed center derivative", "[sin][center][2nd]")
+{
+    double dt = 0.001;
+    auto sg = sinGenerator<double>(STEPS, SIN_AMPLITUDE, SIN_FREQUENCY, dt);
+    auto ct7 = generateC2OTester<double, 7>(std::get<0>(sg), std::get<2>(sg));
+    auto ct9 = generateC2OTester<double, 9>(std::get<0>(sg), std::get<2>(sg));
+    auto ct11 = generateC2OTester<double, 11>(std::get<0>(sg), std::get<2>(sg));
 
-//     ct7.setFilterTimestep(dt);
-//     ct9.setFilterTimestep(dt);
-//     ct11.setFilterTimestep(dt);
+    ct7.setFilterTimestep(dt);
+    ct9.setFilterTimestep(dt);
+    ct11.setFilterTimestep(dt);
 
-//     std::array<double, 1> eps = { 2e-1 }; // Value checked with MATLAB
-//     ct7.run(eps);
-//     ct9.run(eps);
-//     ct11.run(eps);
-// }
+    std::array<double, 1> eps = { 2e-1 }; // Value checked with MATLAB
+    ct7.run(eps);
+    ct9.run(eps);
+    ct11.run(eps);
+}
 
 TEST_CASE("Sinus time-varying central derivative", "[tv][sin][central][1st]")
 {
@@ -148,7 +148,45 @@ TEST_CASE("Sinus time-varying central derivative", "[tv][sin][central][1st]")
     auto ct7 = generateTVCTester<double, 7>(std::get<0>(sg), std::get<1>(sg), std::get<2>(sg));
     auto ct9 = generateTVCTester<double, 9>(std::get<0>(sg), std::get<1>(sg), std::get<2>(sg));
 
-    std::array<double, 2> eps = { 1e-1, 1e-1 }; // Value checked with MATLAB
+    std::array<double, 2> eps = { 1., 1. };
     ct7.run(eps);
     ct9.run(eps);
 }
+
+TEST_CASE("Polynome time-varying central derivative", "[tv][poly][central][1st]")
+{
+    double dt = 0.001;
+    {
+        auto pg = tvPolyGenerator<double>(STEPS, POLY_4<double>, dt);
+        auto ct7 = generateTVCTester<double, 7>(std::get<0>(pg), std::get<1>(pg), std::get<2>(pg));
+        auto ct9 = generateTVCTester<double, 9>(std::get<0>(pg), std::get<1>(pg), std::get<2>(pg));
+
+        std::array<double, 2> eps = { 1e-3, 1e-3 };
+        ct7.run(eps);
+        ct9.run(eps);
+    }
+    {
+        auto pg = tvPolyGenerator<double>(STEPS, POLY_4<double>, dt);
+        auto ct7 = generateTVCTester<double, 7>(std::get<0>(pg), std::get<1>(pg), std::get<2>(pg));
+        auto ct9 = generateTVCTester<double, 9>(std::get<0>(pg), std::get<1>(pg), std::get<2>(pg));
+
+        std::array<double, 2> eps = { 1e-3, 1e-3 };
+        ct7.run(eps);
+        ct9.run(eps);
+    }
+}
+
+// TEST_CASE("2nd order sinus time-varying center derivative", "[tv][sin][center][2nd]")
+// {
+//     // Test not passing.
+//     double dt = 0.001;
+//     auto sg = tvSinGenerator<double>(STEPS, SIN_AMPLITUDE, SIN_FREQUENCY, dt);
+//     auto ct7 = generateTVC2OTester<double, 7>(std::get<0>(sg), std::get<1>(sg), std::get<3>(sg));
+//     auto ct9 = generateTVC2OTester<double, 9>(std::get<0>(sg), std::get<1>(sg), std::get<3>(sg));
+//     auto ct11 = generateTVC2OTester<double, 11>(std::get<0>(sg), std::get<1>(sg), std::get<3>(sg));
+
+//     std::array<double, 1> eps = { 2e-1 };
+//     ct7.run(eps);
+//     ct9.run(eps);
+//     ct11.run(eps);
+// }

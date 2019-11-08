@@ -75,27 +75,17 @@ T TVGenericFilter<T>::stepFilter(const T& time, const T& data)
         m_filteredData(i) = m_filteredData(i - 1);
 
     m_timers(0) = time;
-    switch (m_type) {
-    case FilterType::Backward:
-        for (Eigen::Index i = m_rawData.size() - 1; i > 0; --i)
-            m_timeDiffs(i) = m_timeDiffs(i - 1);
-        m_timeDiffs(0) = std::pow(time - m_timers(1), m_diffOrder);
-        break;
-    case FilterType::Centered: {
-        const Eigen::Index M = (m_rawData.size() - 1) / 2;
-        m_timeDiffs(M) = T(1);
-        for (Eigen::Index i = 1; i < M; ++i) {
-            const T diff = std::pow(m_timers(M - i) - m_timers(M + i), m_diffOrder);
-            m_timeDiffs(M + i) = diff;
-            m_timeDiffs(M - i) = diff;
-        }
-        break;
-    }
-    default: std::invalid_argument("Given FilterType lacks the implementation.");
+    const Eigen::Index M = (m_rawData.size() - 1) / 2;
+    auto bCoeff = m_bCoeff;
+    for (Eigen::Index i = 1; i < M + 1; ++i) {
+        const T diff = std::pow(m_timers(M - i) - m_timers(M + i), m_diffOrder);
+        bCoeff(M + i) /= diff;
+        bCoeff(M - i) /= diff;
+        bCoeff(M) -= (bCoeff(M - i) + bCoeff(M + i));
     }
     m_rawData(0) = data;
     m_filteredData(0) = 0;
-    m_filteredData(0) = (m_bCoeff.cwiseQuotient(m_timeDiffs)).dot(m_rawData) - m_aCoeff.dot(m_filteredData);
+    m_filteredData(0) = bCoeff.dot(m_rawData) - m_aCoeff.dot(m_filteredData);
     return m_filteredData(0);
 }
 
@@ -116,7 +106,6 @@ void TVGenericFilter<T>::resetFilter() noexcept
     m_filteredData.setZero(m_aCoeff.size());
     m_rawData.setZero(m_bCoeff.size());
     m_timers.setZero(m_bCoeff.size());
-    m_timeDiffs.setZero(m_bCoeff.size());
 }
 
 } // namespace difi
