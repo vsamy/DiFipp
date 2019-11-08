@@ -26,13 +26,17 @@
 # either expressed or implied, of the FreeBSD Project.
 
 set(HEADERS
+    BaseFilter.h
+    BaseFilter.tpp
     BilinearTransform.h
     Butterworth.h
     Butterworth.tpp
+    differentiators.h
     difi
     DigitalFilter.h
     GenericFilter.h
     GenericFilter.tpp
+    math_utils.h
     MovingAverage.h
     polynome_functions.h
     type_checks.h

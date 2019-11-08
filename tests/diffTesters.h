@@ -27,7 +27,6 @@
 
 #pragma once
 #include "catch_helper.h"
-#include "differentiators.h"
 #include "difi"
 #include <array>
 #include <catch2/catch.hpp>

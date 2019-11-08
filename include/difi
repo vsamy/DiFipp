@@ -32,6 +32,7 @@
 #include "DigitalFilter.h"
 #include "GenericFilter.h"
 #include "MovingAverage.h"
+#include "differentiators.h"
 #include "polynome_functions.h"
 #include "typedefs.h"
 
