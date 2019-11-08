@@ -28,35 +28,34 @@
 #pragma once
 #include <type_traits>
 
-namespace difi
-{
+namespace difi {
 
 // https://stackoverflow.com/questions/44718971/calculate-binomial-coffeficient-very-reliably
 template <typename T>
-constexpr T Binomial(int n, int k)
+constexpr T Binomial(size_t n, size_t k)
 {
     if (k > n)
         return T(0);
     else if (k == 0 || k == n)
         return T(1);
-    else if (k == 1 || k == n-1)
+    else if (k == 1 || k == n - 1)
         return T(n);
-    else if ( 2 * k < n)
-        return Binomial<T>(n-1, k - 1) * n / k;
+    else if (2 * k < n)
+        return Binomial<T>(n - 1, k - 1) * n / k;
     else
-        return Binomial<T>(n-1, k) * n / (n - k);
+        return Binomial<T>(n - 1, k) * n / (n - k);
 }
 
-template <typename T> 
-constexpr T pow(T n, T k) 
-{ 
-    static_assert(std::is_integral_v<T>);
+template <typename T>
+constexpr T pow(T n, T k)
+{
+    static_assert(std::is_integral_v<T>, "For integral values only, eitherwise, use std::pow");
     if (n == 0)
         return (k == 0) ? 1 : 0;
-    else if (k == 0 || k == 1)
+    else if (k == 0)
         return T(1);
     else
-        return n * pow(n, k - 1); 
+        return n * pow(n, k - 1);
 }
 
 } // namespace difi

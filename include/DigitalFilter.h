@@ -45,40 +45,11 @@ public:
     /*! \brief Constructor.
      * \param aCoeff Denominator coefficients of the filter in decreasing order.
      * \param bCoeff Numerator coefficients of the filter in decreasing order.
+     * \param type Type of the filter.
      */
-    DigitalFilter(const vectX_t<T>& aCoeff, const vectX_t<T>& bCoeff)
-        : GenericFilter<T>(aCoeff, bCoeff)
+    DigitalFilter(const vectX_t<T>& aCoeff, const vectX_t<T>& bCoeff, FilterType type = FilterType::Backward)
+        : GenericFilter<T>(aCoeff, bCoeff, type)
     {
-    }
-
-    void setCoefficients(vectX_t<T>&& aCoeff, vectX_t<T>&& bCoeff)
-    {
-        setCoeffs(std::forward(aCoeff), std::forward(bCoeff));
-    }
-};
-
-/*! \brief Basic centered digital filter.
- * 
- * This filter allows you to set any centered digital filter based on its coefficients.
- * \tparam T Floating type.
- */
-template <typename T>
-class CenteredDigitalFilter : public GenericFilter<T> {
-public:
-    /*! \brief Default uninitialized constructor. */
-    CenteredDigitalFilter() = default;
-    /*! \brief Constructor.
-     * \param aCoeff Denominator coefficients of the filter in decreasing order.
-     * \param bCoeff Numerator coefficients of the filter in decreasing order.
-     */
-    CenteredDigitalFilter(const vectX_t<T>& aCoeff, const vectX_t<T>& bCoeff)
-        : GenericFilter<T>(aCoeff, bCoeff, Type::Centered)
-    {
-    }
-    void setCoefficients(vectX_t<T>&& aCoeff, vectX_t<T>&& bCoeff)
-    {
-        setCoeffs(std::forward(aCoeff), std::forward(bCoeff));
-        setType(Type::Centered);
     }
 };
 

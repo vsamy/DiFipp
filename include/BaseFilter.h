@@ -36,6 +36,7 @@ namespace difi {
 
 // TODO: noexcept(Function of gsl variable)
 // TODO: constructor with universal refs
+// TODO: setCoeffs with universal refs
 
 /*! \brief Low-level filter.
  * 
@@ -57,7 +58,13 @@ public:
     void resetFilter() noexcept { derived().resetFilter(); };
 
     /*!< \brief Return the filter type */
-    FilterType type() const noexcept { return (m_center == 0 ? FilterType::Backward : FilterType::Centered); }
+    FilterType type() const noexcept { return m_type; }
+    /*! \brief Get how far back is the filtered value.
+     * The filtered value is computed at time \f$tc=t - center()*\Delta T\f$ where \f$t\f$ is the current time
+     * \f$\Delta T\f$ is your sampling time. 
+     * \note For FilterType::Backward filter, the function returns 0.
+     */
+    Eigen::Index center() const noexcept { return (m_type == FilterType::Backward ? 0 : ((m_bCoeff.size() - 1) / 2)); }
     /*! \brief Get digital filter coefficients.
      * 
      * It will automatically resize the given vectors.
@@ -75,8 +82,6 @@ public:
     Eigen::Index bOrder() const noexcept { return m_bCoeff.size(); }
     /*! \brief Return the initialization state of the filter0 */
     bool isInitialized() const noexcept { return m_isInitialized; }
-
-protected:
     /*! \brief Set type of filter (one-sided or centered)
      * 
      * \param type The filter type.
@@ -89,8 +94,9 @@ protected:
      * \param aCoeff Denominator coefficients of the filter in decreasing order.
      * \param bCoeff Numerator coefficients of the filter in decreasing order.
      */
-    template <typename T2>
-    void setCoeffs(T2&& aCoeff, T2&& bCoeff);
+    void setCoeffs(const vectX_t<T>& aCoeff, const vectX_t<T>& bCoeff);
+
+protected:
     /*! \brief Normalized the filter coefficients such that aCoeff(0) = 1. */
     void normalizeCoeffs();
     /*! \brief Check for bad coefficients.
@@ -100,7 +106,7 @@ protected:
      * \param bCoeff Numerator coefficients of the filter.
      * \return True if the filter status is set on READY.
      */
-    bool checkCoeffs(const vectX_t<T>& aCoeff, const vectX_t<T>& bCoeff, FilterType type);
+    bool checkCoeffs(const vectX_t<T>& aCoeff, const vectX_t<T>& bCoeff);
 
 private:
     /*! \brief Default uninitialized constructor. */
@@ -108,7 +114,7 @@ private:
     /*! \brief Constructor.
      * \param aCoeff Denominator coefficients of the filter in decreasing order.
      * \param bCoeff Numerator coefficients of the filter in decreasing order.
-     * \param center 
+     * \param type Type of the filter.
      */
     BaseFilter(const vectX_t<T>& aCoeff, const vectX_t<T>& bCoeff, FilterType type = FilterType::Backward);
     /*! \brief Default destructor. */
@@ -118,7 +124,7 @@ private:
     const Derived& derived() const noexcept { return *static_cast<const Derived*>(this); }
 
 private:
-    Eigen::Index m_center = 0; /*!< Center of the filter. 0 is a one-sided filter. Default is 0. */
+    FilterType m_type; /*!< Type of filter. Default is FilterType::Backward. */
     bool m_isInitialized = false; /*!< Initialization state of the filter. Default is false */
     vectX_t<T> m_aCoeff; /*!< Denominator coefficients of the filter */
     vectX_t<T> m_bCoeff; /*!< Numerator coefficients of the filter */

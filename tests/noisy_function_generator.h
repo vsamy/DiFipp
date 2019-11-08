@@ -28,77 +28,170 @@
 #pragma once
 
 #include "typedefs.h"
-#include <tuple>
+#include <array>
 #include <cmath>
-#include <random>
+#include <tuple>
 
 template <typename T>
 using FunctionGenerator = std::tuple<difi::vectX_t<T>, difi::vectX_t<T>, difi::vectX_t<T>>;
 
 template <typename T>
-FunctionGenerator<T> sinGenerator(int nrSteps, T frequency, T dt = 0.001)
+FunctionGenerator<T> sinGenerator(int nrSteps, T amplitude, T frequency, T dt)
 {
     using namespace difi;
 
-    std::random_device rd{};
-    std::mt19937 gen{rd()};
-
-    vectX_t<T> truth;
-    vectX_t<T> noisy;
-    vectX_t<T> derivative;
+    vectX_t<T> f(nrSteps);
+    vectX_t<T> df(nrSteps);
+    vectX_t<T> ddf(nrSteps);
 
     for (int i = 0; i < nrSteps; ++i) {
-        // truth
-        truth(i) = std::sin(2 * pi<T> * frequency * i * dt);
+        // function
+        f(i) = amplitude * std::sin(2 * pi<T> * frequency * i * dt);
 
-        // noisy
-        std::normal_distribution<T> d{truth(i), T(0.01)};
-        noisy(i) = truth(i) + d(gen);
+        // derivative 1
+        df(i) = 2 * pi<T> * frequency * amplitude * std::cos(2 * pi<T> * frequency * i * dt);
 
-        // derivative
-        derivative(i) = 2 * pi<T> * frequency * i * std::cos(2 * pi<T> * frequency * i * dt);
+        // derivative 2
+        ddf(i) = -4 * pi<T> * pi<T> * frequency * frequency * amplitude * std::sin(2 * pi<T> * frequency * i * dt);
     }
 
-    return { truth, noisy, derivative };
+    return { f, df, ddf };
 }
 
-template <typename T>
-FunctionGenerator<T> polyGenerator(int nrSteps, difi::vectX_t<T> coeffs, T dt = 0.001)
+template <typename T, size_t N>
+FunctionGenerator<T> polyGenerator(int nrSteps, std::array<T, N> coeffs, T dt)
 {
     using namespace difi;
-    Expects(coeffs.size() >=2);
-    std::random_device rd{};
-    std::mt19937 gen{rd()};
+    static_assert(N >= 2, "N must be superior to 20");
 
-    auto computePoly = [](const VectX_t<T>& coeffs, T time) {
-        auto recursiveComputation = [time, &coeffs](int i, T result) {
+    auto computePoly = [](const auto& coeffs, T time) {
+        auto recursiveComputation = [time, &coeffs](size_t i, T result, const auto& self) -> T {
             if (i > 0)
-                return recursiveComputation(i - 1, time * result + coeffs(i - 1));
-            else 
+                return self(i - 1, time * result + coeffs[i - 1], self);
+            else
                 return result;
         };
 
-        return recursiveComputation(coeffs.size(), 0);
+        return recursiveComputation(coeffs.size(), 0, recursiveComputation);
     };
 
-    vectX_t<T> derivativeCoeffs(coeffs.size() - 1);
-    for (Eigen::Index i = 1; i < coeffs.size(); ++i)
-        derivativeCoeffs(i - 1) = i * coeffs.tail(i);
+    std::array<T, N - 1> dCoeffs;
+    for (Eigen::Index i = 1; i < N; ++i)
+        dCoeffs[i - 1] = i * coeffs[i];
 
-    vectX_t<T> truth;
-    vectX_t<T> noisy;
-    vectX_t<T> derivative;
+    std::array<T, N - 2> ddCoeffs;
+    for (Eigen::Index i = 1; i < N - 1; ++i)
+        ddCoeffs[i - 1] = i * dCoeffs[i];
+
+    vectX_t<T> f(nrSteps);
+    vectX_t<T> df(nrSteps);
+    vectX_t<T> ddf(nrSteps);
     for (int i = 0; i < nrSteps; ++i) {
-        // truth
-        truth(i) = computePoly(coeffs, i * dt);
+        // function
+        f(i) = computePoly(coeffs, i * dt);
 
-        // noisy
-        std::normal_distribution<T> d{truth(i), T(0.01)};
-        noisy(i) = truth(i) + d(gen);
+        // derivative 1
+        df(i) = computePoly(dCoeffs, i * dt);
 
-        // derivative
-        derivative(i) = computePoly(derivativeCoeffs, i * dt);
+        // derivative 2
+        ddf(i) = computePoly(ddCoeffs, i * dt);
     }
 
-    return { truth, noisy, derivative };
+    return { f, df, ddf };
+}
+
+// TV sin generator
+
+template <typename T>
+using TVFunctionGenerator = std::tuple<difi::vectX_t<T>, difi::vectX_t<T>, difi::vectX_t<T>, difi::vectX_t<T>>;
+
+template <typename T>
+TVFunctionGenerator<T> tvSinGenerator(int nrSteps, T amplitude, T frequency, T meanDt)
+{
+    using namespace difi;
+
+    vectX_t<T> t(nrSteps);
+    vectX_t<T> f(nrSteps);
+    vectX_t<T> df(nrSteps);
+    vectX_t<T> ddf(nrSteps);
+
+    t(0) = T(0);
+    f(0) = T(0);
+    df(0) = 2 * pi<T> * frequency * amplitude;
+    ddf(0) = T(0);
+    for (int i = 1; i < nrSteps; ++i) {
+        // time
+        if (i % 3 == 0)
+            t(i) = t(i - 1) + 0.9 * meanDt;
+        else if (i % 3 == 1)
+            t(i) = t(i - 1) + meanDt;
+        else
+            t(i) = t(i - 1) + 1.1 * meanDt;
+
+        // function
+        f(i) = amplitude * std::sin(2 * pi<T> * frequency * t(i));
+
+        // derivative 1
+        df(i) = 2 * pi<T> * frequency * amplitude * std::cos(2 * pi<T> * frequency * t(i));
+
+        // derivative 2
+        ddf(i) = -4 * pi<T> * pi<T> * frequency * frequency * amplitude * std::sin(2 * pi<T> * frequency * t(i));
+    }
+
+    return { t, f, df, ddf };
+}
+
+template <typename T, size_t N>
+TVFunctionGenerator<T> tvPolyGenerator(int nrSteps, std::array<T, N> coeffs, T dt)
+{
+    using namespace difi;
+    static_assert(N >= 2, "N must be superior to 20");
+
+    auto computePoly = [](const auto& coeffs, T time) {
+        auto recursiveComputation = [time, &coeffs](size_t i, T result, const auto& self) -> T {
+            if (i > 0)
+                return self(i - 1, time * result + coeffs[i - 1], self);
+            else
+                return result;
+        };
+
+        return recursiveComputation(coeffs.size(), 0, recursiveComputation);
+    };
+
+    std::array<T, N - 1> dCoeffs;
+    for (Eigen::Index i = 1; i < N; ++i)
+        dCoeffs[i - 1] = i * coeffs[i];
+
+    std::array<T, N - 2> ddCoeffs;
+    for (Eigen::Index i = 1; i < N - 1; ++i)
+        ddCoeffs[i - 1] = i * dCoeffs[i];
+
+    vectX_t<T> t(nrSteps);
+    vectX_t<T> f(nrSteps);
+    vectX_t<T> df(nrSteps);
+    vectX_t<T> ddf(nrSteps);
+    t(0) = T(0);
+    f(0) = computePoly(coeffs, t(0));
+    df(0) = computePoly(dCoeffs, t(0));
+    ddf(0) = computePoly(ddCoeffs, t(0));
+    for (int i = 1; i < nrSteps; ++i) {
+        // time
+        if (i % 3 == 0)
+            t(i) = t(i - 1) + 0.9 * meanDt;
+        else if (i % 3 == 1)
+            t(i) = t(i - 1) + meanDt;
+        else
+            t(i) = t(i - 1) + 1.1 * meanDt;
+
+        // function
+        f(i) = computePoly(coeffs, t(i));
+
+        // derivative 1
+        df(i) = computePoly(dCoeffs, t(i));
+
+        // derivative 2
+        ddf(i) = computePoly(ddCoeffs, t(i));
+    }
+
+    return { t, f, df, ddf };
 }

@@ -43,6 +43,23 @@ TEST_CASE("Filter failures", "[fail]")
     auto df = difi::DigitalFilterd();
     // Filter data with uninitialized filter
     REQUIRE_THROWS_AS(df.stepFilter(10.), std::logic_error);
+    // Change type before settings coeffs (The difi::FilterType::Centered needs to have odd number of bCoeffs)
+    REQUIRE_THROWS_AS(df.setType(difi::FilterType::Centered), std::logic_error);
+    // Set type to difi::FilterType::Backward is always ok.
+    REQUIRE_NOTHROW(df.setType(difi::FilterType::Backward));
+    // Set even number of bCoeffs
+    REQUIRE_NOTHROW(df.setCoeffs(Eigen::VectorXd::Constant(2, 1), Eigen::VectorXd::Constant(2, 0)));
+    // Check again
+    REQUIRE_THROWS_AS(df.setType(difi::FilterType::Centered), std::logic_error);
+    // Set odd number of bCoeffs
+    REQUIRE_NOTHROW(df.setCoeffs(Eigen::VectorXd::Constant(2, 1), Eigen::VectorXd::Constant(3, 0)));
+    // Check again
+    REQUIRE_NOTHROW(df.setType(difi::FilterType::Centered));
+    // Put even number of bCoeffs on a Centered filter
+    REQUIRE_THROWS_AS(df.setCoeffs(Eigen::VectorXd::Constant(2, 1), Eigen::VectorXd::Constant(2, 0)), std::logic_error);
+    // Put odd number of bCoeffs
+    REQUIRE_NOTHROW(df.setCoeffs(Eigen::VectorXd::Constant(5, 2), Eigen::VectorXd::Constant(7, 3)));
+
     // window <= 0
     REQUIRE_THROWS_AS(difi::MovingAveraged(0), std::logic_error);
     // order <= 0
@@ -54,4 +71,6 @@ TEST_CASE("Filter failures", "[fail]")
 
     // Ok
     REQUIRE_NOTHROW(difi::DigitalFilterd(Eigen::VectorXd::Constant(2, 1), Eigen::VectorXd::Constant(2, 0)));
+    // Bad type. Need odd number of bCoeffs
+    REQUIRE_THROWS_AS(difi::DigitalFilterd(Eigen::VectorXd::Constant(2, 1), Eigen::VectorXd::Constant(2, 0), difi::FilterType::Centered), std::logic_error);
 }

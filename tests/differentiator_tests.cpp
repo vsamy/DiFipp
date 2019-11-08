@@ -26,71 +26,129 @@
 // either expressed or implied, of the FreeBSD Project.
 
 #pragma once
-#include "differentiators.h"
+#include "catch_helper.h"
+#include "diffTesters.h"
 #include "noisy_function_generator.h"
 #include <catch2/catch.hpp>
 #include <limits>
 
-constexpr const int STEPS = 200;
-constexpr const int SIN_FREQUENCY = 60;
+constexpr const int STEPS = 500;
+constexpr const int SIN_AMPLITUDE = 100;
+constexpr const int SIN_FREQUENCY = 1;
+template <typename T> constexpr const std::array<T, 5> POLY_4 = { 2, -3, 3, 2, -5 };
+template <typename T> constexpr const std::array<T, 8> POLY_7 = { 10, -12, 5, 6, -9, -3, -2, 4 };
 
-using namespace difi;
-
-template <typename T>
-struct TestFun {
-    vectX_t<T> f;
-    vectX_t<T> d;
-    int center;
-    double eps;
-};
-
-template <typename T, typename Filter>
-struct TestRunner {
-    void operator()(const TestFun<T>& tf, Filter& f)
-    {
-        for (int i = 0; i < 50; ++i)
-            f.step(tf.f(i)); // First initialize, some steps
-
-        for (int i = 20; i < STEPS; ++i)
-            REQUIRE_SMALL(std::abs(f.step(tf.f(i)) - tf.d(i - tf.center)), tf.eps);
-    }
-};
-
-template <typename T, size_t Ind, typename... Ts>
-struct Tester {
-    void operator()(const TestFun<T>& tf, std::tuple<Ts...> f)
-    {
-        TestRunner(tf, std::get<Ind>(f));
-        Tester<T, Ind - 1, Ts...>(tf, f);
-    }
-};
-
-template <typename T, typename... Ts>
-struct Tester<T, 0, Ts...> {
-    void operator()(const TestFun<T>& tf, std::tuple<Ts...> f) 
-    {
-        TestRunner(tf, std::get<0>(f));
-    }
-};
-
-template <typename T, size_t N>
-using centralList = std::tuple<CentralDiff<T, N>, LowNoiseLanczosDiff<T, N>, SuperLowNoiseLanczosDiff<T, N>, CenteredNoiseRobust2Diff<T, N>, CenteredNoiseRobust4Diff<T, N>>;
-
-TEMPLATE_TEST_CASE("Sinus time-fixed central derivative", "[sin][central]", float, double)
+template <size_t N>
+vectN_t<double, N> generateLNLCoeffs()
 {
+    static_assert(N > 2 && N % 2 == 1, "N must be odd");
+    vectN_t<double, N> lnl;
+    const size_t M = (N - 1) / 2;
+    for (size_t i = 0; i < M + 1; ++i) {
+        lnl(i) = static_cast<double>(M - i);
+        lnl(M + i) = -static_cast<double>(i);
+    }
 
-    FunctionGenerator<TestType> fg = sinGenerator<TestType>(STEPS, SIN_FREQUENCY);
+    return lnl;
+}
 
-    auto list7 = centralList<TestType, 7>{};
-    TestFun<TestType> list7Param = {std::get<0>(fg), std::get<2>(fg), 3, std::numeric_limits<TestType>::epsilon() * 100};
-    TestFun<TestType> list7NoisyParam = {std::get<1>(fg), std::get<2>(fg), 3, std::numeric_limits<TestType>::epsilon() * 100};
-    auto list9 = centralList<TestType, 9>{};
-    TestFun<TestType> list9Param = {std::get<0>(fg), std::get<2>(fg), 4, std::numeric_limits<TestType>::epsilon() * 100};
-    TestFun<TestType> list9NoisyParam = {std::get<1>(fg), std::get<2>(fg), 4, std::numeric_limits<TestType>::epsilon() * 100};
+template <size_t N>
+void checkCoeffs(const vectN_t<double, N>& coeffs, const vectN_t<double, N>& goodCoeffs)
+{
+    for (size_t i = 0; i < N; ++i)
+        REQUIRE_SMALL(std::abs(coeffs(i) - goodCoeffs(i)), std::numeric_limits<double>::epsilon() * 5);
+}
 
-    // Check no noisy function
-    
+TEST_CASE("Coefficient calculation", "[coeff]") // Some coeffs are computed, the rest are given
+{
+    // LNL coeffs
+    checkCoeffs<5>(details::GetLNLCoeffs<double, 5>{}(), generateLNLCoeffs<5>() / 10.);
+    checkCoeffs<7>(details::GetLNLCoeffs<double, 7>{}(), generateLNLCoeffs<7>() / 28.);
+    checkCoeffs<9>(details::GetLNLCoeffs<double, 9>{}(), generateLNLCoeffs<9>() / 60.);
+    checkCoeffs<11>(details::GetLNLCoeffs<double, 11>{}(), generateLNLCoeffs<11>() / 110.);
 
-    // Check for noisy function
+    // FNR coeffs
+    checkCoeffs<3>(details::GetFNRCoeffs<double, 3>{}(), (vectN_t<double, 3>() << 1., 0., -1.).finished() / 2.);
+    checkCoeffs<4>(details::GetFNRCoeffs<double, 4>{}(), (vectN_t<double, 4>() << 1., 1., -1., -1.).finished() / 4.);
+    checkCoeffs<5>(details::GetFNRCoeffs<double, 5>{}(), (vectN_t<double, 5>() << 1., 2., 0., -2., -1.).finished() / 8.);
+    checkCoeffs<6>(details::GetFNRCoeffs<double, 6>{}(), (vectN_t<double, 6>() << 1., 3., 2., -2., -3., -1.).finished() / 16.);
+    checkCoeffs<7>(details::GetFNRCoeffs<double, 7>{}(), (vectN_t<double, 7>() << 1., 4., 5., 0., -5., -4., -1.).finished() / 32.);
+    checkCoeffs<8>(details::GetFNRCoeffs<double, 8>{}(), (vectN_t<double, 8>() << 1., 5., 9., 5., -5., -9., -5., -1.).finished() / 64.);
+    checkCoeffs<9>(details::GetFNRCoeffs<double, 9>{}(), (vectN_t<double, 9>() << 1., 6., 14., 14., 0., -14., -14., -6., -1.).finished() / 128.);
+    checkCoeffs<10>(details::GetFNRCoeffs<double, 10>{}(), (vectN_t<double, 10>() << 1., 7., 20., 28., 14., -14., -28., -20., -7., -1.).finished() / 256.);
+    checkCoeffs<11>(details::GetFNRCoeffs<double, 11>{}(), (vectN_t<double, 11>() << 1., 8., 27., 48., 42., 0., -42., -48., -27., -8., -1.).finished() / 512.);
+}
 
+// TEST_CASE("Sinus time-fixed central derivative", "[sin][central][1st]")
+// {
+//     double dt = 0.001;
+//     auto sg = sinGenerator<double>(STEPS, SIN_AMPLITUDE, SIN_FREQUENCY, dt);
+//     auto ct7 = generateCTester<double, 7>(std::get<0>(sg), std::get<1>(sg));
+//     auto ct9 = generateCTester<double, 9>(std::get<0>(sg), std::get<1>(sg));
+
+//     ct7.setFilterTimestep(dt);
+//     ct9.setFilterTimestep(dt);
+
+//     std::array<double, 5> eps = { 1e-10, 1e-1, 1e-6, 1e-1, 1e-6 }; // Value checked with MATLAB
+//     ct7.run(eps);
+//     ct9.run(eps);
+// }
+
+// TEST_CASE("Polynome time-fixed central derivative", "[poly][central][1st]")
+// {
+//     double dt = 0.001;
+//     {
+//         auto pg4 = polyGenerator<double>(STEPS, POLY_4<double>, dt);
+//         auto ct7 = generateCTester<double, 7>(std::get<0>(pg4), std::get<1>(pg4));
+//         auto ct9 = generateCTester<double, 9>(std::get<0>(pg4), std::get<1>(pg4));
+
+//         ct7.setFilterTimestep(dt);
+//         ct9.setFilterTimestep(dt);
+
+//         std::array<double, 5> eps = { 1e-12, 1e-4, 1e-12, 1e-4, 1e-12 }; // Value checked with MATLAB
+//         ct7.run(eps);
+//         ct9.run(eps);
+//     }
+//     {
+//         auto pg7 = polyGenerator<double>(STEPS, POLY_7<double>, dt);
+//         auto ct7 = generateCTester<double, 7>(std::get<0>(pg7), std::get<1>(pg7));
+//         auto ct9 = generateCTester<double, 9>(std::get<0>(pg7), std::get<1>(pg7));
+
+//         ct7.setFilterTimestep(dt);
+//         ct9.setFilterTimestep(dt);
+
+//         std::array<double, 5> eps = { 1e-11, 1e-3, 1e-9, 1e-4, 1e-9 }; // Value checked with MATLAB
+//         ct7.run(eps);
+//         ct9.run(eps);
+//     }
+// }
+
+// TEST_CASE("2nd order sinus time-fixed center derivative", "[sin][center][2nd]")
+// {
+//     double dt = 0.001;
+//     auto sg = sinGenerator<double>(STEPS, SIN_AMPLITUDE, SIN_FREQUENCY, dt);
+//     auto ct7 = generateC2OTester<double, 7>(std::get<0>(sg), std::get<2>(sg));
+//     auto ct9 = generateC2OTester<double, 9>(std::get<0>(sg), std::get<2>(sg));
+//     auto ct11 = generateC2OTester<double, 11>(std::get<0>(sg), std::get<2>(sg));
+
+//     ct7.setFilterTimestep(dt);
+//     ct9.setFilterTimestep(dt);
+//     ct11.setFilterTimestep(dt);
+
+//     std::array<double, 1> eps = { 2e-1 }; // Value checked with MATLAB
+//     ct7.run(eps);
+//     ct9.run(eps);
+//     ct11.run(eps);
+// }
+
+TEST_CASE("Sinus time-varying central derivative", "[tv][sin][central][1st]")
+{
+    double dt = 0.001;
+    auto sg = tvSinGenerator<double>(STEPS, SIN_AMPLITUDE, SIN_FREQUENCY, dt);
+    auto ct7 = generateTVCTester<double, 7>(std::get<0>(sg), std::get<1>(sg), std::get<2>(sg));
+    auto ct9 = generateTVCTester<double, 9>(std::get<0>(sg), std::get<1>(sg), std::get<2>(sg));
+
+    std::array<double, 2> eps = { 1e-1, 1e-1 }; // Value checked with MATLAB
+    ct7.run(eps);
+    ct9.run(eps);
 }

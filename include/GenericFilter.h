@@ -59,7 +59,7 @@ protected:
 };
 
 template <typename T>
-class TVGenericFilter : public BaseFilter<T, GenericFilter<T>> {
+class TVGenericFilter : public BaseFilter<T, TVGenericFilter<T>> {
 public:
     /*! \brief Filter a new data.
      * 
@@ -67,7 +67,7 @@ public:
      * \param data New data to filter.
      * \return Filtered data.
      */
-    T stepFilter(const T& data, const T& time);
+    T stepFilter(const T& time, const T& data);
     /*! \brief Filter a signal.
      * 
      * Filter all data given by the signal.
@@ -80,17 +80,17 @@ public:
 
 protected:
     TVGenericFilter() = default;
-    TVGenericFilter(int order, const vectX_t<T>& aCoeff, const vectX_t<T>& bCoeff, FilterType type = FilterType::Backward)
+    TVGenericFilter(size_t differentialOrder, const vectX_t<T>& aCoeff, const vectX_t<T>& bCoeff, FilterType type = FilterType::Backward)
         : BaseFilter(aCoeff, bCoeff, type)
-        , m_order(order)
+        , m_diffOrder(differentialOrder)
     {
-        Expects(order >= 1);
-        m_timers.resize(m_bCoeffs.size());
-        m_timeDiffs.resize(m_bCoeffs.size());
+        Expects(differentialOrder >= 1);
+        m_timers.resize(m_bCoeff.size());
+        m_timeDiffs.resize(m_bCoeff.size());
     }
 
 private:
-    int m_order = 1;
+    size_t m_diffOrder = 1;
     vectX_t<T> m_timers;
     vectX_t<T> m_timeDiffs;
 };

@@ -35,16 +35,13 @@ template <typename T, typename Derived>
 void BaseFilter<T, Derived>::setType(FilterType type)
 {
     Expects(type == FilterType::Centered ? m_bCoeff.size() > 2 && m_bCoeff.size() % 2 == 1 : true);
-    m_center = (type == FilterType::Backward ? 0 : (m_bCoeff.size() - 1) / 2);
+    m_type = type;
 }
 
 template <typename T, typename Derived>
-template <typename T2>
-void BaseFilter<T, Derived>::setCoeffs(T2&& aCoeff, T2&& bCoeff)
+void BaseFilter<T, Derived>::setCoeffs(const vectX_t<T>& aCoeff, const vectX_t<T>& bCoeff)
 {
-    static_assert(std::is_convertible_v<T2, vectX_t<T>>, "The coefficients types should be convertible to vectX_t<T>");
-
-    Expects(checkCoeffs(aCoeff, bCoeff, (m_center == 0 ? FilterType::Backward : FilterType::Centered)));
+    Expects(checkCoeffs(aCoeff, bCoeff));
     m_aCoeff = aCoeff;
     m_bCoeff = bCoeff;
     normalizeCoeffs();
@@ -65,11 +62,11 @@ template <typename T, typename Derived>
 BaseFilter<T, Derived>::BaseFilter(const vectX_t<T>& aCoeff, const vectX_t<T>& bCoeff, FilterType type)
     : m_aCoeff(aCoeff)
     , m_bCoeff(bCoeff)
+    , m_type(type)
     , m_filteredData(aCoeff.size())
     , m_rawData(bCoeff.size())
 {
-    Expects(checkCoeffs(aCoeff, bCoeff, type));
-    m_center = (type == FilterType::Backward ? 0 : (bCoeff.size() - 1) / 2);
+    Expects(checkCoeffs(aCoeff, bCoeff));
     normalizeCoeffs();
     resetFilter();
     m_isInitialized = true;
@@ -87,9 +84,9 @@ void BaseFilter<T, Derived>::normalizeCoeffs()
 }
 
 template <typename T, typename Derived>
-bool BaseFilter<T, Derived>::checkCoeffs(const vectX_t<T>& aCoeff, const vectX_t<T>& bCoeff, FilterType type)
+bool BaseFilter<T, Derived>::checkCoeffs(const vectX_t<T>& aCoeff, const vectX_t<T>& bCoeff)
 {
-    bool centering = (type == FilterType::Centered ? (bCoeff.size() % 2 == 1) : true);
+    bool centering = (m_type == FilterType::Centered ? (bCoeff.size() % 2 == 1) : true);
     return aCoeff.size() > 0 && std::abs(aCoeff[0]) > std::numeric_limits<T>::epsilon() && bCoeff.size() > 0 && centering;
 }
 
