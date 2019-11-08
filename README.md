@@ -16,6 +16,8 @@ Please check out the followings
 
 * [Band-reject filters](https://www.dsprelated.com/showarticle/1131.php)
 
+and the differentiators from [Pavel Holoborodko](http://www.holoborodko.com/pavel/)
+
 The library has been tested against Matlab results.
 
 A doxygen documentation is generated when compiling.
