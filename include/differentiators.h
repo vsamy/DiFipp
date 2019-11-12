@@ -38,7 +38,7 @@ namespace details {
 // T: type
 // N: Number of points
 
-// Central differentiators: http://www.holoborodko.com/pavel/numerical-methods/numerical-derivative/central-differences/
+// Centered differentiators: http://www.holoborodko.com/pavel/numerical-methods/numerical-derivative/central-differences/
 template <typename T, size_t N> struct GetCDCoeffs {
     vectN_t<T, N> operator()() const;
 };
@@ -304,12 +304,12 @@ public:
 };
 
 template <typename T, size_t N, int Order, typename CoeffGetter>
-class CentralDifferentiator : public GenericFilter<T> {
+class CenteredDifferentiator : public GenericFilter<T> {
 public:
-    CentralDifferentiator()
+    CenteredDifferentiator()
         : GenericFilter<T>(vectX_t<T>::Constant(1, T(1)), CoeffGetter{}(), FilterType::Centered)
     {}
-    CentralDifferentiator(T timestep)
+    CenteredDifferentiator(T timestep)
         : GenericFilter<T>(vectX_t<T>::Constant(1, T(1)), CoeffGetter{}() / std::pow(timestep, Order))
     {}
     void setTimestep(T timestep) { setCoeffs(vectX_t<T>::Constant(1, T(1)), CoeffGetter{}() / std::pow(timestep, Order)); }
@@ -327,11 +327,11 @@ public:
 };
 
 template <typename T, size_t N, int Order, typename CoeffGetter>
-class TVCentralDifferentiator : public TVGenericFilter<T> {
+class TVCenteredDifferentiator : public TVGenericFilter<T> {
     static_assert(Order >= 1, "Order must be greater or equal to 1");
 
 public:
-    TVCentralDifferentiator()
+    TVCenteredDifferentiator()
         : TVGenericFilter<T>(Order, vectX_t<T>::Constant(1, T(1)), CoeffGetter{}(), FilterType::Centered)
     {}
 };
@@ -339,30 +339,30 @@ public:
 } // namespace details
 
 // Backward differentiators
-template <typename T, size_t N> using BackwardNoiseRobustDiff = details::BackwardDifferentiator<T, N, 1, details::GetFNRCoeffs<T, N>>;
-template <typename T, size_t N> using BackwardHybridNoiseRobustDiff = details::BackwardDifferentiator<T, N, 1, details::GetFHNRCoeffs<T, N>>;
+template <typename T, size_t N> using BackwardDiffNoiseRobust = details::BackwardDifferentiator<T, N, 1, details::GetFNRCoeffs<T, N>>;
+template <typename T, size_t N> using BackwardDiffHybridNoiseRobust = details::BackwardDifferentiator<T, N, 1, details::GetFHNRCoeffs<T, N>>;
 // Time-Varying backward differentiators
-template <typename T, size_t N> using TVBackwardNoiseRobustDiff = details::TVBackwardDifferentiator<T, N, 1, details::GetFNRISDCoeffs<T, N>>;
-template <typename T, size_t N> using TVBackwardHybridNoiseRobustDiff = details::TVBackwardDifferentiator<T, N, 1, details::GetFHNRISDCoeffs<T, N>>;
+template <typename T, size_t N> using TVBackwardDiffNoiseRobust = details::TVBackwardDifferentiator<T, N, 1, details::GetFNRISDCoeffs<T, N>>;
+template <typename T, size_t N> using TVBackwardDiffHybridNoiseRobust = details::TVBackwardDifferentiator<T, N, 1, details::GetFHNRISDCoeffs<T, N>>;
 
-// Central differentiators
-template <typename T, size_t N> using CentralDiff = details::CentralDifferentiator<T, N, 1, details::GetCDCoeffs<T, N>>;
-template <typename T, size_t N> using LowNoiseLanczosDiff = details::CentralDifferentiator<T, N, 1, details::GetLNLCoeffs<T, N>>;
-template <typename T, size_t N> using SuperLowNoiseLanczosDiff = details::CentralDifferentiator<T, N, 1, details::GetSLNLCoeffs<T, N>>;
-template <typename T, size_t N> using CenteredNoiseRobust2Diff = details::CentralDifferentiator<T, N, 1, details::GetCNR2Coeffs<T, N>>;
-template <typename T, size_t N> using CenteredNoiseRobust4Diff = details::CentralDifferentiator<T, N, 1, details::GetCNR4Coeffs<T, N>>;
-// Time-Varying central differentiators
-template <typename T, size_t N> using TVCenteredNoiseRobust2Diff = details::TVCentralDifferentiator<T, N, 1, details::GetCNR2ISDCoeffs<T, N>>;
-template <typename T, size_t N> using TVCenteredNoiseRobust4Diff = details::TVCentralDifferentiator<T, N, 1, details::GetCNR4ISDCoeffs<T, N>>;
+// Centered differentiators
+template <typename T, size_t N> using CenteredDiffBasic = details::CenteredDifferentiator<T, N, 1, details::GetCDCoeffs<T, N>>;
+template <typename T, size_t N> using CenteredDiffLowNoiseLanczos = details::CenteredDifferentiator<T, N, 1, details::GetLNLCoeffs<T, N>>;
+template <typename T, size_t N> using CenteredDiffSuperLowNoiseLanczos = details::CenteredDifferentiator<T, N, 1, details::GetSLNLCoeffs<T, N>>;
+template <typename T, size_t N> using CenteredDiffNoiseRobust2 = details::CenteredDifferentiator<T, N, 1, details::GetCNR2Coeffs<T, N>>;
+template <typename T, size_t N> using CenteredDiffNoiseRobust4 = details::CenteredDifferentiator<T, N, 1, details::GetCNR4Coeffs<T, N>>;
+// Time-Varying centered differentiators
+template <typename T, size_t N> using TVCenteredDiffNoiseRobust2 = details::TVCenteredDifferentiator<T, N, 1, details::GetCNR2ISDCoeffs<T, N>>;
+template <typename T, size_t N> using TVCenteredDiffNoiseRobust4 = details::TVCenteredDifferentiator<T, N, 1, details::GetCNR4ISDCoeffs<T, N>>;
 
 // Second-order backward differentiators
-template <typename T, size_t N> using BackwardSecondOrderDiff = details::BackwardDifferentiator<T, N, 2, details::GetSOFNRCoeffs<T, N>>;
+template <typename T, size_t N> using BackwardDiffSecondOrder = details::BackwardDifferentiator<T, N, 2, details::GetSOFNRCoeffs<T, N>>;
 // Second-order Time-Varying backward differentiators
-template <typename T, size_t N> using TVBackwardSecondOrderDiff = details::TVBackwardDifferentiator<T, N, 2, details::GetSOFNRISDCoeffs<T, N>>;
+template <typename T, size_t N> using TVBackwardDiffSecondOrder = details::TVBackwardDifferentiator<T, N, 2, details::GetSOFNRISDCoeffs<T, N>>;
 
-// Second-order central differentiators
-template <typename T, size_t N> using CenteredSecondOrderDiff = details::CentralDifferentiator<T, N, 2, details::GetSOCNRCoeffs<T, N>>;
-// Second-order Time-Varying central differentiators
-template <typename T, size_t N> using TVCenteredSecondOrderDiff = details::TVCentralDifferentiator<T, N, 2, details::GetSOCNRISDCoeffs<T, N>>;
+// Second-order centered differentiators
+template <typename T, size_t N> using CenteredDiffSecondOrder = details::CenteredDifferentiator<T, N, 2, details::GetSOCNRCoeffs<T, N>>;
+// Second-order Time-Varying centered differentiators
+template <typename T, size_t N> using TVCenteredDiffSecondOrder = details::TVCenteredDifferentiator<T, N, 2, details::GetSOCNRISDCoeffs<T, N>>;
 
 } // namespace difi

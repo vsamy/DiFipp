@@ -136,32 +136,32 @@ private:
     vectX_t<T> m_time;
 };
 
-template <typename T, size_t N>
-using central_list = std::tuple<CentralDiff<T, N>, LowNoiseLanczosDiff<T, N>, SuperLowNoiseLanczosDiff<T, N>, CenteredNoiseRobust2Diff<T, N>, CenteredNoiseRobust4Diff<T, N>>;
+template <size_t N>
+using central_list = std::tuple<CenteredDiffBasicd<N>, CenteredDiffLowNoiseLanczosd<N>, CenteredDiffSuperLowNoiseLanczosd<N>, CenteredDiffNoiseRobust2d<N>, CenteredDiffNoiseRobust4d<N>>;
 
-template <typename T, size_t N>
-TFDiffTester<T, central_list<T, N>> generateCTester(const vectX_t<T>& f, const vectX_t<T>& df)
+template <size_t N>
+TFDiffTester<double, central_list<N>> generateCTester(const vectX_t<double>& f, const vectX_t<double>& df)
 {
-    return { central_list<T, N>{}, f, df };
+    return { central_list<N>{}, f, df };
 }
 
-template <typename T, size_t N>
-TFDiffTester<T, std::tuple<CenteredSecondOrderDiff<T, N>>> generateC2OTester(const vectX_t<T>& f, const vectX_t<T>& df)
+template <size_t N>
+TFDiffTester<double, std::tuple<CenteredDiffSecondOrderd<N>>> generateC2OTester(const vectX_t<double>& f, const vectX_t<double>& df)
 {
-    return { std::tuple<CenteredSecondOrderDiff<T, N>>{}, f, df };
+    return { std::tuple<CenteredDiffSecondOrderd<N>>{}, f, df };
 }
 
-template <typename T, size_t N>
-using tv_central_list = std::tuple<TVCenteredNoiseRobust2Diff<T, N>, TVCenteredNoiseRobust4Diff<T, N>>;
+template <size_t N>
+using tv_central_list = std::tuple<TVCenteredDiffNoiseRobust2d<N>, TVCenteredDiffNoiseRobust4d<N>>;
 
-template <typename T, size_t N>
-TVDiffTester<T, tv_central_list<T, N>> generateTVCTester(const vectX_t<T>& t, const vectX_t<T>& f, const vectX_t<T>& df)
+template <size_t N>
+TVDiffTester<double, tv_central_list<N>> generateTVCTester(const vectX_t<double>& t, const vectX_t<double>& f, const vectX_t<double>& df)
 {
-    return { tv_central_list<T, N>{}, t, f, df };
+    return { tv_central_list<N>{}, t, f, df };
 }
 
-template <typename T, size_t N>
-TVDiffTester<T, std::tuple<TVCenteredSecondOrderDiff<T, N>>> generateTVC2OTester(const vectX_t<T>& t, const vectX_t<T>& f, const vectX_t<T>& df)
+template <size_t N>
+TVDiffTester<double, std::tuple<TVCenteredDiffSecondOrderd<N>>> generateTVC2OTester(const vectX_t<double>& t, const vectX_t<double>& f, const vectX_t<double>& df)
 {
-    return { std::tuple<TVCenteredSecondOrderDiff<T, N>>{}, t, f, df };
+    return { std::tuple<TVCenteredSecondOrderDiff<N>>{}, t, f, df };
 }

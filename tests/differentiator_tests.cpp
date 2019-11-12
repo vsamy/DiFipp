@@ -83,8 +83,8 @@ TEST_CASE("Sinus time-fixed central derivative", "[sin][central][1st]")
 {
     double dt = 0.001;
     auto sg = sinGenerator<double>(STEPS, SIN_AMPLITUDE, SIN_FREQUENCY, dt);
-    auto ct7 = generateCTester<double, 7>(std::get<0>(sg), std::get<1>(sg));
-    auto ct9 = generateCTester<double, 9>(std::get<0>(sg), std::get<1>(sg));
+    auto ct7 = generateCTester<7>(std::get<0>(sg), std::get<1>(sg));
+    auto ct9 = generateCTester<9>(std::get<0>(sg), std::get<1>(sg));
 
     ct7.setFilterTimestep(dt);
     ct9.setFilterTimestep(dt);
@@ -99,8 +99,8 @@ TEST_CASE("Polynome time-fixed central derivative", "[poly][central][1st]")
     double dt = 0.001;
     {
         auto pg = polyGenerator<double>(STEPS, POLY_4<double>, dt);
-        auto ct7 = generateCTester<double, 7>(std::get<0>(pg), std::get<1>(pg));
-        auto ct9 = generateCTester<double, 9>(std::get<0>(pg), std::get<1>(pg));
+        auto ct7 = generateCTester<7>(std::get<0>(pg), std::get<1>(pg));
+        auto ct9 = generateCTester<9>(std::get<0>(pg), std::get<1>(pg));
 
         ct7.setFilterTimestep(dt);
         ct9.setFilterTimestep(dt);
@@ -111,8 +111,8 @@ TEST_CASE("Polynome time-fixed central derivative", "[poly][central][1st]")
     }
     {
         auto pg = polyGenerator<double>(STEPS, POLY_7<double>, dt);
-        auto ct7 = generateCTester<double, 7>(std::get<0>(pg), std::get<1>(pg));
-        auto ct9 = generateCTester<double, 9>(std::get<0>(pg), std::get<1>(pg));
+        auto ct7 = generateCTester<7>(std::get<0>(pg), std::get<1>(pg));
+        auto ct9 = generateCTester<9>(std::get<0>(pg), std::get<1>(pg));
 
         ct7.setFilterTimestep(dt);
         ct9.setFilterTimestep(dt);
@@ -127,9 +127,9 @@ TEST_CASE("2nd order sinus time-fixed center derivative", "[sin][center][2nd]")
 {
     double dt = 0.001;
     auto sg = sinGenerator<double>(STEPS, SIN_AMPLITUDE, SIN_FREQUENCY, dt);
-    auto ct7 = generateC2OTester<double, 7>(std::get<0>(sg), std::get<2>(sg));
-    auto ct9 = generateC2OTester<double, 9>(std::get<0>(sg), std::get<2>(sg));
-    auto ct11 = generateC2OTester<double, 11>(std::get<0>(sg), std::get<2>(sg));
+    auto ct7 = generateC2OTester<7>(std::get<0>(sg), std::get<2>(sg));
+    auto ct9 = generateC2OTester<9>(std::get<0>(sg), std::get<2>(sg));
+    auto ct11 = generateC2OTester<11>(std::get<0>(sg), std::get<2>(sg));
 
     ct7.setFilterTimestep(dt);
     ct9.setFilterTimestep(dt);
@@ -145,8 +145,8 @@ TEST_CASE("Sinus time-varying central derivative", "[tv][sin][central][1st]")
 {
     double dt = 0.001;
     auto sg = tvSinGenerator<double>(STEPS, SIN_AMPLITUDE, SIN_FREQUENCY, dt);
-    auto ct7 = generateTVCTester<double, 7>(std::get<0>(sg), std::get<1>(sg), std::get<2>(sg));
-    auto ct9 = generateTVCTester<double, 9>(std::get<0>(sg), std::get<1>(sg), std::get<2>(sg));
+    auto ct7 = generateTVCTester<7>(std::get<0>(sg), std::get<1>(sg), std::get<2>(sg));
+    auto ct9 = generateTVCTester<9>(std::get<0>(sg), std::get<1>(sg), std::get<2>(sg));
 
     std::array<double, 2> eps = { 1., 1. };
     ct7.run(eps);
@@ -158,8 +158,8 @@ TEST_CASE("Polynome time-varying central derivative", "[tv][poly][central][1st]"
     double dt = 0.001;
     {
         auto pg = tvPolyGenerator<double>(STEPS, POLY_4<double>, dt);
-        auto ct7 = generateTVCTester<double, 7>(std::get<0>(pg), std::get<1>(pg), std::get<2>(pg));
-        auto ct9 = generateTVCTester<double, 9>(std::get<0>(pg), std::get<1>(pg), std::get<2>(pg));
+        auto ct7 = generateTVCTester<7>(std::get<0>(pg), std::get<1>(pg), std::get<2>(pg));
+        auto ct9 = generateTVCTester<9>(std::get<0>(pg), std::get<1>(pg), std::get<2>(pg));
 
         std::array<double, 2> eps = { 1e-3, 1e-3 };
         ct7.run(eps);
@@ -167,8 +167,8 @@ TEST_CASE("Polynome time-varying central derivative", "[tv][poly][central][1st]"
     }
     {
         auto pg = tvPolyGenerator<double>(STEPS, POLY_4<double>, dt);
-        auto ct7 = generateTVCTester<double, 7>(std::get<0>(pg), std::get<1>(pg), std::get<2>(pg));
-        auto ct9 = generateTVCTester<double, 9>(std::get<0>(pg), std::get<1>(pg), std::get<2>(pg));
+        auto ct7 = generateTVCTester<7>(std::get<0>(pg), std::get<1>(pg), std::get<2>(pg));
+        auto ct9 = generateTVCTester<9>(std::get<0>(pg), std::get<1>(pg), std::get<2>(pg));
 
         std::array<double, 2> eps = { 1e-3, 1e-3 };
         ct7.run(eps);
