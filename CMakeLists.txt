@@ -28,7 +28,7 @@
 # Version minimum
 cmake_minimum_required(VERSION 3.1.3)
 
-set(PROJECT_NAME diFi++)
+set(PROJECT_NAME difi++)
 set(PROJECT_DESCRIPTION "Filter using rational transfer function")
 set(PROJECT_URL "https://github.com/vsamy/DiFipp")
 SET(PROJECT_DEBUG_POSTFIX "_d")
