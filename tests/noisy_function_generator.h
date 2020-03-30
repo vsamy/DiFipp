@@ -77,11 +77,11 @@ FunctionGenerator<T> polyGenerator(int nrSteps, std::array<T, N> coeffs, T dt)
 
     std::array<T, N - 1> dCoeffs;
     for (size_t i = 1; i < N; ++i)
-        dCoeffs[i - 1] = i * coeffs[i];
+        dCoeffs[i - 1] = static_cast<T>(i) * coeffs[i];
 
     std::array<T, N - 2> ddCoeffs;
     for (size_t i = 1; i < N - 1; ++i)
-        ddCoeffs[i - 1] = i * dCoeffs[i];
+        ddCoeffs[i - 1] = static_cast<T>(i) * dCoeffs[i];
 
     vectX_t<T> f(nrSteps);
     vectX_t<T> df(nrSteps);
@@ -160,11 +160,11 @@ TVFunctionGenerator<T> tvPolyGenerator(int nrSteps, std::array<T, N> coeffs, T m
 
     std::array<T, N - 1> dCoeffs;
     for (size_t i = 1; i < N; ++i)
-        dCoeffs[i - 1] = i * coeffs[i];
+        dCoeffs[i - 1] = static_cast<T>(i) * coeffs[i];
 
     std::array<T, N - 2> ddCoeffs;
     for (size_t i = 1; i < N - 1; ++i)
-        ddCoeffs[i - 1] = i * dCoeffs[i];
+        ddCoeffs[i - 1] = static_cast<T>(i) * dCoeffs[i];
 
     vectX_t<T> t(nrSteps);
     vectX_t<T> f(nrSteps);

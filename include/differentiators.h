@@ -191,7 +191,7 @@ template <typename T, int N, typename CNRCoeffs> vectN_t<T, N> GetCNRISDCoeffs()
     vectN_t<T, N> v{};
     const vectN_t<T, N> v0 = CNRCoeffs{}();
     v(M) = 0;
-    for (Eigen::Index k = 1; k < M + 1; ++k) {
+    for (int k = 1; k < M + 1; ++k) {
         v(M - k) = T(2) * k * v0(M - k);
         v(M + k) = T(2) * k * v0(M + k);
     }
