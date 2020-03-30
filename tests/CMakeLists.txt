@@ -44,7 +44,7 @@ addTest(GenericFilterTests)
 addTest(polynome_functions_tests)
 addTest(DigitalFilterTests)
 addTest(MovingAverageFilterTests)
-addTest(ButterWorthFilterTests)
+addTest(ButterworthFilterTests)
 
 # Differentiators
 addTest(differentiator_tests)

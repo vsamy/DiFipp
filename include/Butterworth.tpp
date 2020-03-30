@@ -131,7 +131,7 @@ void Butterworth<T>::computeDigitalRep(T fc)
     }
 
     scaleAmplitude(aCoeff, bCoeff);
-    setCoeffs(std::move(aCoeff), std::move(bCoeff));
+    this->setCoeffs(std::move(aCoeff), std::move(bCoeff));
 }
 
 template <typename T>
@@ -164,14 +164,14 @@ void Butterworth<T>::computeBandDigitalRep(T fLower, T fUpper)
     else
         scaleAmplitude(aCoeff, bCoeff);
 
-    setCoeffs(std::move(aCoeff), std::move(bCoeff));
+    this->setCoeffs(std::move(aCoeff), std::move(bCoeff));
 }
 
 template <typename T>
 std::complex<T> Butterworth<T>::generateAnalogPole(int k, T fpw1)
 {
     auto thetaK = [pi = pi<T>, order = m_order](int k) -> T {
-        return (2 * k - 1) * pi / (2 * order);
+        return static_cast<float>(2 * k - 1) * pi / static_cast<float>(2 * order);
     };
 
     std::complex<T> analogPole(-std::sin(thetaK(k)), std::cos(thetaK(k)));
@@ -189,7 +189,7 @@ template <typename T>
 std::pair<std::complex<T>, std::complex<T>> Butterworth<T>::generateBandAnalogPole(int k, T fpw0, T bw)
 {
     auto thetaK = [pi = pi<T>, order = m_order](int k) -> T {
-        return (2 * k - 1) * pi / (2 * order);
+        return static_cast<float>(2 * k - 1) * pi / static_cast<float>(2 * order);
     };
 
     std::complex<T> analogPole(-std::sin(thetaK(k)), std::cos(thetaK(k)));

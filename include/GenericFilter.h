@@ -33,6 +33,13 @@ namespace difi {
 
 template <typename T>
 class GenericFilter : public BaseFilter<T, GenericFilter<T>> {
+    using Base = BaseFilter<T, GenericFilter<T>>;
+    using Base::m_isInitialized;
+    using Base::m_aCoeff;
+    using Base::m_bCoeff;
+    using Base::m_rawData;
+    using Base::m_filteredData;
+
 public:
     /*! \brief Filter a new data.
      * 
@@ -54,12 +61,19 @@ public:
 protected:
     GenericFilter() = default;
     GenericFilter(const vectX_t<T>& aCoeff, const vectX_t<T>& bCoeff, FilterType type = FilterType::Backward)
-        : BaseFilter(aCoeff, bCoeff, type)
+        : Base(aCoeff, bCoeff, type)
     {}
 };
 
 template <typename T>
 class TVGenericFilter : public BaseFilter<T, TVGenericFilter<T>> {
+    using Base = BaseFilter<T, TVGenericFilter<T>>;
+    using Base::m_isInitialized;
+    using Base::m_aCoeff;
+    using Base::m_bCoeff;
+    using Base::m_rawData;
+    using Base::m_filteredData;
+
 public:
     /*! \brief Filter a new data.
      * 
@@ -81,12 +95,12 @@ public:
 protected:
     TVGenericFilter() = default;
     TVGenericFilter(size_t differentialOrder, const vectX_t<T>& aCoeff, const vectX_t<T>& bCoeff, FilterType type = FilterType::Backward)
-        : BaseFilter()
+        : Base()
         , m_diffOrder(differentialOrder)
     {
         Expects(differentialOrder >= 1);
-        setCoeffs(aCoeff, bCoeff);
-        setType(type);
+        this->setCoeffs(aCoeff, bCoeff);
+        this->setType(type);
     }
 
 private:

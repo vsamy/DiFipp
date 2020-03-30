@@ -45,7 +45,7 @@ DISABLE_CONVERSION_WARNING_END
 TEMPLATE_TEST_CASE_METHOD(System, "Digital filter", "[df]", float, double)
 {
     System<TestType> s;
-    auto df = difi::DigitalFilter<TestType>(aCoeff, bCoeff);
+    auto df = difi::DigitalFilter<TestType>(s.aCoeff, s.bCoeff);
     test_coeffs(s.aCoeff, s.bCoeff, df, std::numeric_limits<TestType>::epsilon() * 10);
     test_results(s.results, s.data, df, std::numeric_limits<TestType>::epsilon() * 10);
 }

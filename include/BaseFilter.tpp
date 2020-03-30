@@ -60,9 +60,9 @@ void BaseFilter<T, Derived>::getCoeffs(vectX_t<T>& aCoeff, vectX_t<T>& bCoeff) c
 
 template <typename T, typename Derived>
 BaseFilter<T, Derived>::BaseFilter(const vectX_t<T>& aCoeff, const vectX_t<T>& bCoeff, FilterType type)
-    : m_aCoeff(aCoeff)
+    : m_type(type)
+    , m_aCoeff(aCoeff)
     , m_bCoeff(bCoeff)
-    , m_type(type)
     , m_filteredData(aCoeff.size())
     , m_rawData(bCoeff.size())
 {

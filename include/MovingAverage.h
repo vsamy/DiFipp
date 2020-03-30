@@ -50,16 +50,16 @@ public:
     MovingAverage(int windowSize, FilterType type = FilterType::Backward)
     {
         setWindowSize(windowSize);
-        setType(type);
+        this->setType(type);
     }
     /*! \brief Set the size of the moving average window. */
     void setWindowSize(int windowSize)
     {
         Expects(windowSize > 0);
-        setCoeffs(vectX_t<T>::Constant(1, T(1)), vectX_t<T>::Constant(windowSize, T(1) / windowSize));
+        this->setCoeffs(vectX_t<T>::Constant(1, T(1)), vectX_t<T>::Constant(windowSize, T(1) / static_cast<T>(windowSize)));
     }
     /*! \brief Get the size of the moving average window. */
-    int windowSize() const noexcept { return bOrder(); }
+    int windowSize() const noexcept { return this->bOrder(); }
 };
 
 } // namespace difi

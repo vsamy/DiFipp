@@ -61,41 +61,41 @@ using BilinearTransformcf = BilinearTransform<std::complex<float>>;
 using BilinearTransformcd = BilinearTransform<std::complex<double>>;
 
 // 1st order centered differentiators
-template <size_t N> using CenteredDiffBasicf = CenteredDiffBasic<float, N>;
-template <size_t N> using CenteredDiffBasicd = CenteredDiffBasic<double, N>;
-template <size_t N> using CenteredDiffLowNoiseLanczosf = CenteredDiffLowNoiseLanczos<float, N>;
-template <size_t N> using CenteredDiffLowNoiseLanczosd = CenteredDiffLowNoiseLanczos<double, N>;
-template <size_t N> using CenteredDiffSuperLowNoiseLanczosf = CenteredDiffSuperLowNoiseLanczos<float, N>;
-template <size_t N> using CenteredDiffSuperLowNoiseLanczosd = CenteredDiffSuperLowNoiseLanczos<double, N>;
-template <size_t N> using CenteredDiffNoiseRobust2f = CenteredDiffNoiseRobust2<float, N>;
-template <size_t N> using CenteredDiffNoiseRobust2d = CenteredDiffNoiseRobust2<double, N>;
-template <size_t N> using CenteredDiffNoiseRobust4f = CenteredDiffNoiseRobust4<float, N>;
-template <size_t N> using CenteredDiffNoiseRobust4d = CenteredDiffNoiseRobust4<double, N>;
-template <size_t N> using TVCenteredDiffNoiseRobust2f = TVCenteredDiffNoiseRobust2<float, N>;
-template <size_t N> using TVCenteredDiffNoiseRobust2d = TVCenteredDiffNoiseRobust2<double, N>;
-template <size_t N> using TVCenteredDiffNoiseRobust4f = TVCenteredDiffNoiseRobust4<float, N>;
-template <size_t N> using TVCenteredDiffNoiseRobust4d = TVCenteredDiffNoiseRobust4<double, N>;
+template <int N> using CenteredDiffBasicf = CenteredDiffBasic<float, N>;
+template <int N> using CenteredDiffBasicd = CenteredDiffBasic<double, N>;
+template <int N> using CenteredDiffLowNoiseLanczosf = CenteredDiffLowNoiseLanczos<float, N>;
+template <int N> using CenteredDiffLowNoiseLanczosd = CenteredDiffLowNoiseLanczos<double, N>;
+template <int N> using CenteredDiffSuperLowNoiseLanczosf = CenteredDiffSuperLowNoiseLanczos<float, N>;
+template <int N> using CenteredDiffSuperLowNoiseLanczosd = CenteredDiffSuperLowNoiseLanczos<double, N>;
+template <int N> using CenteredDiffNoiseRobust2f = CenteredDiffNoiseRobust2<float, N>;
+template <int N> using CenteredDiffNoiseRobust2d = CenteredDiffNoiseRobust2<double, N>;
+template <int N> using CenteredDiffNoiseRobust4f = CenteredDiffNoiseRobust4<float, N>;
+template <int N> using CenteredDiffNoiseRobust4d = CenteredDiffNoiseRobust4<double, N>;
+template <int N> using TVCenteredDiffNoiseRobust2f = TVCenteredDiffNoiseRobust2<float, N>;
+template <int N> using TVCenteredDiffNoiseRobust2d = TVCenteredDiffNoiseRobust2<double, N>;
+template <int N> using TVCenteredDiffNoiseRobust4f = TVCenteredDiffNoiseRobust4<float, N>;
+template <int N> using TVCenteredDiffNoiseRobust4d = TVCenteredDiffNoiseRobust4<double, N>;
 
 // 2nd order centered differentiators
-template <size_t N> using CenteredDiffSecondOrderf = CenteredDiffSecondOrder<float, N>;
-template <size_t N> using CenteredDiffSecondOrderd = CenteredDiffSecondOrder<double, N>;
-template <size_t N> using TVCenteredDiffSecondOrderf = TVCenteredDiffSecondOrder<float, N>;
-template <size_t N> using TVCenteredDiffSecondOrderd = TVCenteredDiffSecondOrder<double, N>;
+template <int N> using CenteredDiffSecondOrderf = CenteredDiffSecondOrder<float, N>;
+template <int N> using CenteredDiffSecondOrderd = CenteredDiffSecondOrder<double, N>;
+template <int N> using TVCenteredDiffSecondOrderf = TVCenteredDiffSecondOrder<float, N>;
+template <int N> using TVCenteredDiffSecondOrderd = TVCenteredDiffSecondOrder<double, N>;
 
 // 1st order backward differentiators
-template <size_t N> using BackwardDiffNoiseRobustf = BackwardDiffNoiseRobust<float, N>;
-template <size_t N> using BackwardDiffNoiseRobustd = BackwardDiffNoiseRobust<double, N>;
-template <size_t N> using BackwardDiffHybridNoiseRobustf = BackwardDiffHybridNoiseRobust<float, N>;
-template <size_t N> using BackwardDiffHybridNoiseRobustd = BackwardDiffHybridNoiseRobust<double, N>;
-template <size_t N> using TVBackwardDiffNoiseRobustf = TVBackwardDiffNoiseRobust<float, N>;
-template <size_t N> using TVBackwardDiffNoiseRobustd = TVBackwardDiffNoiseRobust<double, N>;
-template <size_t N> using TVBackwardDiffHybridNoiseRobustf = TVBackwardDiffHybridNoiseRobust<float, N>;
-template <size_t N> using TVBackwardDiffHybridNoiseRobustd = TVBackwardDiffHybridNoiseRobust<double, N>;
+template <int N> using BackwardDiffNoiseRobustf = BackwardDiffNoiseRobust<float, N>;
+template <int N> using BackwardDiffNoiseRobustd = BackwardDiffNoiseRobust<double, N>;
+template <int N> using BackwardDiffHybridNoiseRobustf = BackwardDiffHybridNoiseRobust<float, N>;
+template <int N> using BackwardDiffHybridNoiseRobustd = BackwardDiffHybridNoiseRobust<double, N>;
+template <int N> using TVBackwardDiffNoiseRobustf = TVBackwardDiffNoiseRobust<float, N>;
+template <int N> using TVBackwardDiffNoiseRobustd = TVBackwardDiffNoiseRobust<double, N>;
+template <int N> using TVBackwardDiffHybridNoiseRobustf = TVBackwardDiffHybridNoiseRobust<float, N>;
+template <int N> using TVBackwardDiffHybridNoiseRobustd = TVBackwardDiffHybridNoiseRobust<double, N>;
 
 // 2nd order backward differentiators
-template <size_t N> using BackwardDiffSecondOrderf = BackwardDiffSecondOrder<float, N>;
-template <size_t N> using BackwardDiffSecondOrderd = BackwardDiffSecondOrder<double, N>;
-template <size_t N> using TVBackwardDiffSecondOrderf = TVBackwardDiffSecondOrder<float, N>;
-template <size_t N> using TVBackwardDiffSecondOrderd = TVBackwardDiffSecondOrder<double, N>;
+template <int N> using BackwardDiffSecondOrderf = BackwardDiffSecondOrder<float, N>;
+template <int N> using BackwardDiffSecondOrderd = BackwardDiffSecondOrder<double, N>;
+template <int N> using TVBackwardDiffSecondOrderf = TVBackwardDiffSecondOrder<float, N>;
+template <int N> using TVBackwardDiffSecondOrderd = TVBackwardDiffSecondOrder<double, N>;
 
 } // namespace difi

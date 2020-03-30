@@ -27,18 +27,17 @@
 
 #pragma once
 
-#ifdef _MSC_VER
+#if defined(_MSC_VER)
 #define DCW_BEGIN           \
     __pragma(warning(push)) \
-        __pragma(warning(disable : 4305))
+    __pragma(warning(disable : 4305))
 #define DCW_END __pragma(warning(pop))
-#else
-#ifdef __GNUC__ || __clang__
+#elif defined(__GNUC__) || defined(__clang__)
 #define DCW_BEGIN               \
-    _Pragma("GCC warning push") \
-        _Pragma("GCC diagnostic ignored \"-Wconversion\"")
-#define DCW_END _Pragma("GCC warning pop")
-#endif
+    _Pragma("GCC diagnostic push") \
+    _Pragma("GCC diagnostic ignored \"-Wfloat-conversion\"") \
+    _Pragma("GCC diagnostic ignored \"-Wconversion\"") // Only needed for clang
+#define DCW_END _Pragma("GCC diagnostic pop")
 #endif
 
 #ifdef DCW_BEGIN

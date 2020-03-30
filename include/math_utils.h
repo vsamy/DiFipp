@@ -32,7 +32,7 @@ namespace difi {
 
 // https://stackoverflow.com/questions/44718971/calculate-binomial-coffeficient-very-reliably
 template <typename T>
-constexpr T Binomial(size_t n, size_t k)
+constexpr T Binomial(int n, int k)
 {
     if (k > n)
         return T(0);
