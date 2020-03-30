@@ -49,7 +49,7 @@ constexpr T Binomial(int n, int k)
 template <typename T>
 constexpr T pow(T n, T k)
 {
-    static_assert(std::is_integral_v<T>, "For integral values only, eitherwise, use std::pow");
+    static_assert(std::is_integral<T>::value, "For integral values only, eitherwise, use std::pow");
     if (n == 0)
         return (k == 0) ? 1 : 0;
     else if (k == 0)

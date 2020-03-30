@@ -35,7 +35,7 @@ SET(PROJECT_DEBUG_POSTFIX "_d")
 set(INSTALL_GENERATED_HEADERS OFF)
 
 set(DOXYGEN_USE_MATHJAX "NO")
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 14)
 
 option(BUILD_TESTING "Disable unit tests." ON)
 option(BUILD_TEST_STATIC_BOOST "Build unit tests with static boost libraries" OFF)
