@@ -26,10 +26,10 @@
 // either expressed or implied, of the FreeBSD Project.
 
 #pragma once
-#include "catch_helper.h"
+#include "doctest_helper.h"
 #include "difi"
 #include <array>
-#include <catch2/catch.hpp>
+#include "doctest/doctest.h"
 
 using namespace difi;
 

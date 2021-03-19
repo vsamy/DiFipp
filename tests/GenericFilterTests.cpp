@@ -26,11 +26,11 @@
 // either expressed or implied, of the FreeBSD Project.
 
 #include "difi"
+#include "doctest/doctest.h"
 #include <exception>
 #include <vector>
-#include <catch2/catch.hpp>
 
-TEST_CASE("Filter failures", "[fail]")
+TEST_CASE("Filter failures")
 {
     // A coeff are missing
     REQUIRE_THROWS_AS(difi::DigitalFilterd(Eigen::VectorXd(), Eigen::VectorXd::Constant(2, 0)), std::logic_error);

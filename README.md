@@ -36,11 +36,6 @@ cmake ..
 make install
 ```
 
-Testing
------
-
-To test you need to install [catch2](https://github.com/catchorg/Catch2) on your system.
-
 Note
 -----
 

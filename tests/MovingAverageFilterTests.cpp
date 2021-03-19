@@ -26,8 +26,8 @@
 // either expressed or implied, of the FreeBSD Project.
 
 #include "difi"
+#include "doctest/doctest.h"
 #include "test_functions.h"
-#include <catch2/catch.hpp>
 
 template <typename T>
 struct System {
@@ -36,9 +36,9 @@ struct System {
     difi::vectX_t<T> results = (difi::vectX_t<T>(6) << 0.25, 0.75, 1.5, 2.5, 3.5, 4.5).finished();
 };
 
-TEMPLATE_TEST_CASE_METHOD(System, "Moving average filter", "[maf]", float, double)
+TEST_CASE_TEMPLATE("Moving average filter", T, float, double)
 {
-    System<TestType> s;
-    auto maf = difi::MovingAverage<TestType>(s.windowSize);
-    test_results(s.results, s.data, maf, std::numeric_limits<TestType>::epsilon() * 10);
+    System<T> s;
+    auto maf = difi::MovingAverage<T>(s.windowSize);
+    test_results(s.results, s.data, maf, std::numeric_limits<T>::epsilon() * 10);
 }

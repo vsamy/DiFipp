@@ -28,8 +28,8 @@
 #pragma once
 
 #include "difi"
-#include <Catch2/catch.hpp>
-#include "catch_helper.h"
+#include "doctest/doctest.h"
+#include "doctest_helper.h"
 #include <limits>
 
 template <typename T>

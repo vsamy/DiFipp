@@ -26,9 +26,9 @@
 // either expressed or implied, of the FreeBSD Project.
 
 #include "difi"
+#include "doctest/doctest.h"
+#include "doctest_helper.h"
 #include "warning_macro.h"
-#include "catch_helper.h"
-#include <catch2/catch.hpp>
 #include <limits>
 
 using c_int_t = std::complex<int>;
@@ -61,7 +61,7 @@ struct SystemCFloat {
 
 DISABLE_CONVERSION_WARNING_END
 
-TEST_CASE_METHOD(SystemInt, "Polynome function for int", "[poly]")
+TEST_CASE("Polynome function for int")
 {
     SystemInt s;
     auto res = difi::VietaAlgoi::polyCoeffFromRoot(s.data);
@@ -69,16 +69,16 @@ TEST_CASE_METHOD(SystemInt, "Polynome function for int", "[poly]")
         REQUIRE_EQUAL(res(i), s.results(i));
 }
 
-TEMPLATE_TEST_CASE_METHOD(SystemFloat, "Polynome function for floating point", "[poly]", float, double)
+TEST_CASE_TEMPLATE("Polynome function for floating point", T, float, double)
 {
-    SystemFloat<TestType> s;
-    auto res = difi::VietaAlgo<TestType>::polyCoeffFromRoot(s.data);
+    SystemFloat<T> s;
+    auto res = difi::VietaAlgo<T>::polyCoeffFromRoot(s.data);
 
     for (Eigen::Index i = 0; i < res.size(); ++i)
-        REQUIRE_SMALL(std::abs(res(i) - s.results(i)), std::numeric_limits<TestType>::epsilon() * 1000);
+        REQUIRE_SMALL(std::abs(res(i) - s.results(i)), std::numeric_limits<T>::epsilon() * 1000);
 }
 
-TEST_CASE_METHOD(SystemCInt, "Polynome function for complex int", "[poly]")
+TEST_CASE("Polynome function for complex int")
 {
     SystemCInt s;
     auto res = difi::VietaAlgoci::polyCoeffFromRoot(s.data);
@@ -86,11 +86,11 @@ TEST_CASE_METHOD(SystemCInt, "Polynome function for complex int", "[poly]")
         REQUIRE_EQUAL(res(i), s.results(i));
 }
 
-TEMPLATE_TEST_CASE_METHOD(SystemFloat, "Polynome function for complex floating point", "[poly]", float, double)
+TEST_CASE_TEMPLATE("Polynome function for complex floating point", T, float, double)
 {
-    SystemCFloat<TestType> s;
-    auto res = difi::VietaAlgo<std::complex<TestType>>::polyCoeffFromRoot(s.data);
+    SystemCFloat<T> s;
+    auto res = difi::VietaAlgo<std::complex<T>>::polyCoeffFromRoot(s.data);
 
     for (Eigen::Index i = 0; i < res.size(); ++i)
-        REQUIRE_SMALL(std::abs(res(i) - s.results(i)), std::numeric_limits<TestType>::epsilon() * 1000);
+        REQUIRE_SMALL(std::abs(res(i) - s.results(i)), std::numeric_limits<T>::epsilon() * 1000);
 }

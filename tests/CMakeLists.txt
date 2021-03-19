@@ -27,16 +27,13 @@
 
 enable_testing()
 
-find_package(Catch2 REQUIRED)
-
 macro(addTest testName)
     add_executable(${testName} ${testName}.cpp)
     if (MSVC)
         target_compile_definitions(${testName} PUBLIC _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS)
     endif()
-    target_link_libraries(${testName} PRIVATE Catch2::Catch2)
-    target_compile_definitions(${testName} PRIVATE CATCH_CONFIG_MAIN)
-    target_include_directories(${testName} SYSTEM PRIVATE "${EIGEN3_INCLUDE_DIR}")
+    target_compile_definitions(${testName} PUBLIC DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN)
+    target_link_libraries(${testName} PUBLIC Eigen3::Eigen)
     # Adding a project configuration file (for MSVC only)
     generate_msvc_dot_user_file(${testName})
 

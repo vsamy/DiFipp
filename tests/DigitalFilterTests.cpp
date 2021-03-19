@@ -26,9 +26,9 @@
 // either expressed or implied, of the FreeBSD Project.
 
 #include "difi"
+#include "doctest/doctest.h"
 #include "test_functions.h"
 #include "warning_macro.h"
-#include <catch2/catch.hpp>
 
 DISABLE_CONVERSION_WARNING_BEGIN
 
@@ -42,10 +42,10 @@ struct System {
 
 DISABLE_CONVERSION_WARNING_END
 
-TEMPLATE_TEST_CASE_METHOD(System, "Digital filter", "[df]", float, double)
+TEST_CASE_TEMPLATE("Digital filter", T, float, double)
 {
-    System<TestType> s;
-    auto df = difi::DigitalFilter<TestType>(s.aCoeff, s.bCoeff);
-    test_coeffs(s.aCoeff, s.bCoeff, df, std::numeric_limits<TestType>::epsilon() * 10);
-    test_results(s.results, s.data, df, std::numeric_limits<TestType>::epsilon() * 10);
+    System<T> s;
+    auto df = difi::DigitalFilter<T>(s.aCoeff, s.bCoeff);
+    test_coeffs(s.aCoeff, s.bCoeff, df, std::numeric_limits<T>::epsilon() * 10);
+    test_results(s.results, s.data, df, std::numeric_limits<T>::epsilon() * 10);
 }

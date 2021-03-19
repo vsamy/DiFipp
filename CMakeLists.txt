@@ -26,7 +26,7 @@
 # either expressed or implied, of the FreeBSD Project.
 
 # Version minimum
-cmake_minimum_required(VERSION 3.1.3)
+cmake_minimum_required(VERSION 3.8.2)
 
 set(PROJECT_NAME difi++)
 set(PROJECT_DESCRIPTION "Filter using rational transfer function")
@@ -38,7 +38,6 @@ set(DOXYGEN_USE_MATHJAX "NO")
 set(CMAKE_CXX_STANDARD 17)
 
 option(BUILD_TESTING "Disable unit tests." ON)
-option(BUILD_TEST_STATIC_BOOST "Build unit tests with static boost libraries" OFF)
 option(THROW_ON_CONTRACT_VIOLATION "Throw an error when program fails." ON)
 option(TERMINATE_ON_CONTRACT_VIOLATION "Terminate program when an error occurs. (Default)" OFF)
 option(UNENFORCED_ON_CONTRACT_VIOLATION "Do not perform any check." OFF)
@@ -71,6 +70,3 @@ add_subdirectory(include)
 if(${BUILD_TESTING})
     add_subdirectory(tests)
 endif()
-
-setup_project_finalize()
-setup_project_package_finalize()
